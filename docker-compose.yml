@@ -1,0 +1,8 @@
+# Okey Score Tracker - Docker Compose
+version: '3.8'
+services:
+  okey-app:
+    build: .
+    ports:
+      - "8080:80"
+    restart: unless-stopped
