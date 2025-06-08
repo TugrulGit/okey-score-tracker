@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -10,6 +10,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { getGames, addGame, resetGames } from "./api";
 
 interface Player {
   name: string;
@@ -21,6 +22,14 @@ function App() {
   const [playerName, setPlayerName] = useState("");
   const [roundScores, setRoundScores] = useState<string[]>([]);
   const [round, setRound] = useState(0);
+  const [games, setGames] = useState<any[]>([]);
+
+  // API base URL for backend
+  const API_BASE = "/api";
+
+  useEffect(() => {
+    getGames().then(setGames);
+  }, []);
 
   const handleAddPlayer = () => {
     if (
@@ -61,6 +70,23 @@ function App() {
     setPlayers(players.filter((_, i) => i !== idx));
     setRoundScores(roundScores.filter((_, i) => i !== idx));
   };
+
+  const handleAddGame = async (game: any) => {
+    await addGame(game);
+    setGames(await getGames());
+  };
+
+  const handleResetGames = async () => {
+    await resetGames();
+    setGames([]);
+  };
+
+  // Example: fetch games from backend (Node.js)
+  // useEffect(() => {
+  //   fetch(`${API_BASE}/games`)
+  //     .then(res => res.json())
+  //     .then(data => console.log(data));
+  // }, []);
 
   return (
     <Container maxWidth="sm" sx={{ py: 4 }}>
