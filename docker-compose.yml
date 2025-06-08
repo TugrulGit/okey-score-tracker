@@ -1,8 +1,14 @@
 # Okey Score Tracker - Docker Compose
 version: "3.8"
 services:
-  okey-app:
-    build: .
+  frontend:
+    build: ./frontend
     ports:
-      - "8080:80"
+      - "80:80"
     restart: unless-stopped
+  backend:
+    build: ./backend
+    ports:
+      - "8081:8080"
+    restart: unless-stopped
+  # database and mlm services can be added here as needed
