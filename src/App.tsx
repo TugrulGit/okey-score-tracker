@@ -85,10 +85,7 @@ function App() {
             <ListItem
               key={p.name}
               secondaryAction={
-                <IconButton
-                  edge="end"
-                  onClick={() => handleRemovePlayer(idx)}
-                >
+                <IconButton edge="end" onClick={() => handleRemovePlayer(idx)}>
                   <DeleteIcon />
                 </IconButton>
               }
