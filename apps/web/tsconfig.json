@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": ".next",
+    "baseUrl": ".",
+    "paths": {
+      "ui-kit": ["../../packages/ui-kit/dist"],
+      "ui-kit/*": ["../../packages/ui-kit/dist/*"],
+      "domain/*": ["../../packages/domain/src/*"]
+    },
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "noEmit": true,
+    "incremental": true,
+    "isolatedModules": true,
+    "jsx": "preserve"
+  },
+  "include": ["next-env.d.ts", "src/**/*", "../../packages/ui-kit/dist/**/*"],
+  "exclude": ["node_modules"]
+}

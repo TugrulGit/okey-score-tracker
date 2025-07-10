@@ -1,0 +1,19 @@
+{
+  "name": "ui-kit",
+  "version": "0.0.1",
+  "main": "src/index.js",
+  "types": "dist/index.d.ts",
+  "private": true,
+  "dependencies": {
+    "@types/react": "^18.3.23",
+    "@types/react-dom": "^18.3.7",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "scripts": {
+    "build": "tsc --outDir dist"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}
