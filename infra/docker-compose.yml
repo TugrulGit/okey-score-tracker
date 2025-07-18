@@ -7,5 +7,7 @@ services:
       dockerfile: infra/Dockerfile
     ports:
       - "3000:3000"
+    stdin_open: true
+    tty: true
     environment:
       - NODE_ENV=production

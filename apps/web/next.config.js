@@ -1,9 +1,13 @@
 /** @type {import('next').NextConfig} */
+const path = require('path');
+
 const nextConfig = {
+  output: 'standalone',
   reactStrictMode: true,
   transpilePackages: ['ui-kit'],
   experimental: {
-    externalDir: true
+    externalDir: true,
+    outputFileTracingRoot: path.join(__dirname, '../..')
   },
   webpack(config) {
     // (optional) if you’d rather alias straight to your src:
@@ -11,4 +15,5 @@ const nextConfig = {
     return config;
   }
 };
+
 module.exports = nextConfig;
