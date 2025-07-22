@@ -1,13 +1,23 @@
-version: "3.9"
+version: '3.9'
 
 services:
   web:
     build:
       context: ..
-      dockerfile: infra/Dockerfile
+      dockerfile: infra/web.Dockerfile
     ports:
-      - "3000:3000"
+      - '3000:3000'
     stdin_open: true
     tty: true
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - api
+  api:
+    build:
+      context: ..
+      dockerfile: infra/api.Dockerfile
+    ports:
+      - '4000:4000'
     environment:
       - NODE_ENV=production
