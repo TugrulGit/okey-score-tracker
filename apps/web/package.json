@@ -6,7 +6,8 @@
     "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx --max-warnings 0"
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx --max-warnings 0",
+    "clean": "rimraf .next node_modules .turbo .eslintcache"
   },
   "dependencies": {
     "next": "14.2.3",
@@ -18,8 +19,6 @@
     "@types/node": "^20.11.27",
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18.3.7",
-    "eslint": "^9.2.0",
-    "eslint-config-next": "14.2.3",
     "typescript": "^5.4.5"
   }
 }
