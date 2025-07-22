@@ -7,10 +7,18 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# Root Build output Dirs
+node_modules/
+.turbo/
+
+# Web Build output Dirs
+**/node_modules/
+**/.turbo/
+**/.next/
+
+# Api Build output Dirs
+**/dist/
+**/.tsbuildinfo
 
 # Editor directories and files
 .vscode/*
@@ -26,10 +34,6 @@ dist-ssr
 # Dependency directories
 jspm_packages/
 typings/
-
-# Next.js build output
-.next/
-out/
 
 # Caches and temporary files
 .cache/
