@@ -1,13 +1,17 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "module": "NodeNext",
+    "target": "es2020",
+    "moduleResolution": "nodenext",
     "rootDir": "./src",
     "outDir": "./dist",
     "incremental": true,
     "tsBuildInfoFile": ".tsbuildinfo",
     "paths": {
       "@okey-score/domain/*": ["../../packages/domain/src/*"]
-    }
+    },
+    "experimentalDecorators": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
