@@ -11,7 +11,8 @@
     "react-dom": "18.3.1"
   },
   "scripts": {
-    "build": "tsc --outDir dist"
+    "build": "tsc --outDir dist",
+    "clean": "rimraf dist node_modules"
   },
   "devDependencies": {
     "typescript": "^5.8.3"
