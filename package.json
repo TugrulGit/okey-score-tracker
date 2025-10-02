@@ -11,12 +11,15 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:web": "pnpm --filter web exec next lint",
     "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
-    "build": "pnpm --filter ui-kit build && pnpm turbo run build --parallel --filter api --filter web...",
+    "build:dev": "pnpm --filter ui-kit build && pnpm turbo run build --parallel --filter api --filter web...",
+    "build:prod": "pnpm run --filter ui-kit build && pnpm run --parallel --filter api --filter web build",
     "dev": "turbo run start:dev --parallel --filter web --filter api",
+    "prod": "pnpm run --parallel --filter web --filter api start:prod",
     "dev:web": "pnpm --filter web dev",
     "docker:build": "docker build -f infra/web.Dockerfile -t okey-web:local . && docker build -f infra/api.Dockerfile -t okey-api:local .",
     "clean": "turbo run clean --parallel && rimraf node_modules .turbo",
-    "start:dev": "read -p 'Continue with install? (y/n): ' yn && [ \"$yn\" = \"y\" ] && pnpm install && read -p 'Continue with build? (y/n): ' yn && [ \"$yn\" = \"y\" ] && pnpm run build && read -p 'Continue with dev? (y/n): ' yn && [ \"$yn\" = \"y\" ] && pnpm run dev"
+    "start:dev": "read -p 'Continue with install? (y/n): ' yn && [ \"$yn\" = \"y\" ] && pnpm install && read -p 'Continue with build? (y/n): ' yn && [ \"$yn\" = \"y\" ] && pnpm run build:dev && read -p 'Continue with dev? (y/n): ' yn && [ \"$yn\" = \"y\" ] && pnpm run dev",
+    "start:prod": "read -p 'Continue with install? (y/n): ' yn && [ \"$yn\" = \"y\" ] && pnpm install -prod && read -p 'Continue with build? (y/n): ' yn && [ \"$yn\" = \"y\" ] && pnpm run build:prod && read -p 'Continue with prod? (y/n): ' yn && [ \"$yn\" = \"y\" ] && pnpm run prod"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",

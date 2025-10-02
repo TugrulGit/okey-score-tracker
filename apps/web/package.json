@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "start:dev": "pnpm run dev",
+    "start:prod": "next start -p 3000",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx --max-warnings 0",
     "clean": "rimraf .next node_modules .turbo .eslintcache"
   },

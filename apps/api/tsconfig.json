@@ -11,7 +11,8 @@
     "paths": {
       "@okey-score/domain/*": ["../../packages/domain/src/*"]
     },
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "preserveWatchOutput": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
