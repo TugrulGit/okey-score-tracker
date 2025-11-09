@@ -1,5 +1,6 @@
-html,
-body,
+* {
+  box-sizing: border-box;
+}
 #__next {
   height: 100%;
 }
@@ -9,4 +10,19 @@ body {
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial,
     sans-serif;
   background: #fdfcfb;
+}
+:root {
+  /* CSS HEX */
+  --selective-yellow: #fbaf00ff;
+  --gold: #ffd639ff;
+  --salmon-pink: #ffa3afff;
+  --honolulu-blue: #007cbeff;
+  --pigment-green: #00af54ff;
+
+  /* CSS HSL */
+  --selective-yellow: hsla(42, 100%, 49%, 1);
+  --gold: hsla(48, 100%, 61%, 1);
+  --salmon-pink: hsla(352, 100%, 82%, 1);
+  --honolulu-blue: hsla(201, 100%, 37%, 1);
+  --pigment-green: hsla(149, 100%, 34%, 1);
 }
