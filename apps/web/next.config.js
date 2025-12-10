@@ -11,7 +11,7 @@ const nextConfig = {
   },
   webpack(config) {
     // (optional) if you’d rather alias straight to your src:
-    // config.resolve.alias['ui-kit'] = path.resolve(__dirname, '../../packages/ui-kit/src');
+    config.resolve.alias['ui-kit'] = path.resolve(__dirname, '../../packages/ui-kit/src');
     return config;
   }
 };

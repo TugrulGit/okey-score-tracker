@@ -5,15 +5,17 @@
   "types": "dist/index.d.ts",
   "private": true,
   "scripts": {
-    "build": "tsc --outDir dist",
+    "build": "tsc --outDir dist && node ./scripts/copy-static-assets.cjs",
     "clean": "rimraf dist node_modules"
   },
   "dependencies": {
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18.3.7",
+    "domain": "workspace:*",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "typescript": "^5.8.3"
+
   },
   "devDependencies": {
     "typescript": "^5.8.3"

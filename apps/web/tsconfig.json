@@ -4,8 +4,8 @@
     "outDir": ".next",
     "baseUrl": ".",
     "paths": {
-      "ui-kit": ["../../packages/ui-kit/dist"],
-      "ui-kit/*": ["../../packages/ui-kit/dist/*"],
+      "ui-kit": ["../../packages/ui-kit/src"],
+      "ui-kit/*": ["../../packages/ui-kit/src/*"],
       "domain/*": ["../../packages/domain/src/*"]
     },
     "lib": ["dom", "dom.iterable", "esnext"],
@@ -15,6 +15,6 @@
     "isolatedModules": true,
     "jsx": "preserve"
   },
-  "include": ["next-env.d.ts", "src/**/*", "../../packages/ui-kit/dist/**/*"],
+  "include": ["next-env.d.ts", "src/**/*", "../../packages/ui-kit/src/**/*"],
   "exclude": ["node_modules"]
 }

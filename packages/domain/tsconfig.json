@@ -10,7 +10,7 @@
         "forceConsistentCasingInFileNames": true, // Ensure consistent casing in imports
         "baseUrl": ".", // Set the base directory for module resolution
         "paths": {
-            "@domain/*": ["./src/*"] // Alias for domain package imports
+            "domain/*": ["./src/*"] // Alias for domain package imports
         }
     },
     "include": ["src"], // Include all files in the src directory
