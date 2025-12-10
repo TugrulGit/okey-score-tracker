@@ -1,0 +1,15 @@
+:root {
+  /* CSS HEX */
+  --color-selective-yellow: #fbaf00ff;
+  --color-gold: #ffd639ff;
+  --color-salmon-pink: #ffa3afff;
+  --color-honolulu-blue: #007cbeff;
+  --color-pigment-green: #00af54ff;
+
+  /* CSS HSL */
+  --color-selective-yellow-hsl: hsla(42, 100%, 49%, 1);
+  --color-gold-hsl: hsla(48, 100%, 61%, 1);
+  --color-salmon-pink-hsl: hsla(352, 100%, 82%, 1);
+  --color-honolulu-blue-hsl: hsla(201, 100%, 37%, 1);
+  --color-pigment-green-hsl: hsla(149, 100%, 34%, 1);
+}

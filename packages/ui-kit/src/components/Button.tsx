@@ -1,11 +1,15 @@
-import { PropsWithChildren } from "react";
-import { ReactElement } from "react";
+import {
+  ButtonHTMLAttributes,
+  PropsWithChildren,
+  ReactElement,
+} from "react";
 
-type ButtonProps = {
-};
+type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement>;
 
-
-export function Button({ children }: PropsWithChildren<ButtonProps>): ReactElement {
+export function Button({
+  children,
+  ...rest
+}: PropsWithChildren<ButtonProps>): ReactElement {
   return (
     <button
       style={{
@@ -17,7 +21,7 @@ export function Button({ children }: PropsWithChildren<ButtonProps>): ReactEleme
         cursor: "pointer",
         fontWeight: 600,
       }}
-      onClick={() => alert("Hello from UI-Kit!")}
+      {...rest}
     >
       {children}
     </button>

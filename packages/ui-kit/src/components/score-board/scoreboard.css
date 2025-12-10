@@ -1,0 +1,389 @@
+:root {
+  --scoreboard-font-family: 'Inter', system-ui, -apple-system, 'Segoe UI',
+    sans-serif;
+  --scoreboard-title-size: 1.75em;
+  --scoreboard-body-size: 1em;
+  --scoreboard-label-size: 0.85em;
+  --scoreboard-small-size: 0.75em;
+  /* --scoreboard-heading-color: rgba(255, 255, 255, 0.95); */
+  /* --scoreboard-text-color: rgba(255, 255, 255, 0.9); */
+  --scoreboard-heading-color: var(--color-honolulu-blue, black);
+  --scoreboard-text-color: rgb(58, 48, 0);
+  --scoreboard-muted-text-color: rgba(255, 255, 255, 0.7);
+  --scoreboard-border-light: 1px solid rgba(255, 255, 255, 0.35);
+  --scoreboard-border-pill: 1px solid rgba(255, 255, 255, 0.4);
+  --scoreboard-shadow-soft: 0 8px 30px rgba(0, 0, 0, 0.15);
+  --scoreboard-shadow-pill: 0 2px 10px rgba(0, 0, 0, 0.08);
+  --scoreboard-radius-lg: 24px;
+  --scoreboard-radius-md: 20px;
+  --scoreboard-radius-pill: 16px;
+}
+* {
+  color: var(--scoreboard-text-color);
+}
+
+.scoreboard-wrapper {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: var(--scoreboard-font-family);
+}
+
+.scoreboard-card {
+  background: linear-gradient(
+    160deg,
+    rgba(0, 124, 190, 0.25) 0%,
+    rgba(255, 163, 175, 0.2) 50%,
+    rgba(255, 214, 57, 0.18) 100%
+  );
+  border-radius: var(--scoreboard-radius-lg);
+  padding: 24px;
+  border: var(--scoreboard-border-light);
+  box-shadow: var(--scoreboard-shadow-soft);
+  backdrop-filter: saturate(140%) blur(18px);
+  color: rgba(10, 10, 10, 0.95);
+}
+
+.scoreboard-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.scoreboard-header-info {
+  max-width: 480px;
+}
+
+.scoreboard-title {
+  margin: 0;
+  font-size: var(--scoreboard-title-size);
+  font-weight: 600;
+  color: var(--scoreboard-heading-color);
+}
+
+.scoreboard-subtitle {
+  margin: 0.25em 0 0;
+  color: var(--scoreboard-muted-text-color);
+  font-size: var(--scoreboard-label-size);
+}
+
+.scoreboard-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.scoreboard-start-btn,
+.scoreboard-reset-btn {
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: var(--scoreboard-border-light);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.scoreboard-start-btn {
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(0, 124, 190, 0.85);
+}
+
+.scoreboard-start-btn:disabled {
+  background: rgba(255, 255, 255, 0.2);
+  cursor: not-allowed;
+}
+
+.scoreboard-reset-btn {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.scoreboard-player-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.scoreboard-player-count-toggle {
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.scoreboard-player-count-option {
+  min-width: 48px;
+  padding: 8px 14px;
+  border-radius: 14px;
+  border: none;
+  background: transparent;
+  color: var(--scoreboard-text-color);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.scoreboard-player-count-option.active {
+  background: rgba(0, 124, 190, 0.85);
+  color: #fff;
+}
+
+.scoreboard-player-count-option:disabled {
+  cursor: not-allowed;
+}
+
+.scoreboard-player-add-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--scoreboard-radius-md);
+  border: none;
+  background: var(--color-gold, #ffd639ff);
+  box-shadow: 0 10px 18px rgba(255, 214, 57, 0.35);
+  color: #3a3000;
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.scoreboard-player-add-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.scoreboard-player-lock-message {
+  color: var(--scoreboard-muted-text-color);
+  font-size: var(--scoreboard-label-size);
+}
+
+.scoreboard-rowgroup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.scoreboard-players-row {
+  display: grid;
+  gap: 14px;
+}
+
+.scoreboard-player-card {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: var(--scoreboard-radius-pill);
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  flex-direction: column;
+  gap: 6px;
+}
+
+.scoreboard-player-input {
+  border: none;
+  background: transparent;
+  font-size: 1.125em;
+  font-weight: 600;
+  width: 100%;
+  outline: none;
+}
+
+.scoreboard-player-error {
+  color: #ffa3afff;
+  font-size: var(--scoreboard-small-size);
+  font-weight: 500;
+  align-self: flex-start;
+}
+
+.scoreboard-round-row {
+  display: grid;
+  gap: 14px;
+  align-items: center;
+}
+
+.scoreboard-score-input {
+  text-align: center;
+  border-radius: var(--scoreboard-radius-pill);
+  border: var(--scoreboard-border-pill);
+  padding: 12px 8px;
+  background: rgba(255, 255, 255, 0.22);
+  font-size: 1.125em;
+  font-weight: 600;
+  box-shadow: var(--scoreboard-shadow-pill);
+  outline-color: rgba(0, 124, 190, 0.35);
+}
+
+.scoreboard-round-delete {
+  border-radius: 14px;
+  border: var(--scoreboard-border-pill);
+  background: rgba(0, 0, 0, 0.15);
+  color: #fff;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.scoreboard-round-delete:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.scoreboard-add-round-btn {
+  border: 1px dashed rgba(255, 255, 255, 0.5);
+  border-radius: 16px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.15);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.scoreboard-penalties {
+  margin-top: 28px;
+  padding: 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.scoreboard-penalties-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.scoreboard-penalties-title {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.scoreboard-penalties-description {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+}
+
+.scoreboard-penalty-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.scoreboard-penalty-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  border-radius: 16px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.scoreboard-penalty-info {
+  min-width: 160px;
+}
+
+.scoreboard-penalty-label {
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 600;
+}
+
+.scoreboard-penalty-copy {
+  margin: 4px 0 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+}
+
+.scoreboard-penalty-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: 1;
+}
+
+.scoreboard-penalty-button {
+  border-radius: 16px;
+  padding: 10px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  min-width: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.scoreboard-penalty-player {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.scoreboard-penalty-player-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.scoreboard-totals {
+  margin-top: 24px;
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.scoreboard-totals-grid {
+  display: grid;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.scoreboard-total-card {
+  border-radius: 16px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.15);
+  color: #fff;
+  text-align: center;
+  position: relative;
+}
+
+.scoreboard-total-player {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.scoreboard-total-score {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.scoreboard-winner-badge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: rgba(0, 175, 84, 0.95);
+  color: #fff;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.scoreboard-footer {
+  margin-top: 18px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 12px;
+}
