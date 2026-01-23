@@ -19,12 +19,12 @@ export default function ScoreBoardPage() {
       >
         <ScoreBoard
           title="Okey Score Table"
-          initialPlayers={['Aylin', 'Mert', 'Deniz']}
+          initialPlayers={['Aylin', 'Mert', 'Deniz', 'Can']}
           initialRounds={[
-            { scores: [52, 93, 115] },
-            { scores: [101, 110, 42] },
-            { scores: [78, 56, 34] },
-            { scores: [42, 80, 68] }
+            { scores: [52, 93, 115, 78] },
+            { scores: [101, 110, 42, 56] },
+            { scores: [78, 56, 34, 90] },
+            { scores: [42, 80, 68, 100] }
           ]}
           initialPenalties={[
             { misplay: 0, okeyToOpponent: 0, slowPlay: 0 },
