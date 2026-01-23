@@ -1,10 +1,12 @@
 import {
-  ChangeEvent,
+  WheelEvent,
   ReactElement,
   useCallback,
   useEffect,
   useMemo,
-  useState
+  useRef,
+  useState,
+  KeyboardEvent as ReactKeyboardEvent
 } from 'react';
 import '../../themes/palette.css';
 import './scoreboard.css';
@@ -40,6 +42,8 @@ const PENALTY_TYPES = [
     color: 'var(--honolulu-blue, #007cbeff)'
   }
 ];
+const SCORE_MIN = -500;
+const SCORE_MAX = 500;
 type PenaltyId = (typeof PENALTY_TYPES)[number]['id'];
 interface Player {
   id: string;
@@ -68,6 +72,8 @@ export interface ScoreBoardProps {
 }
 const clamp = (value: number, min: number, max: number) =>
   Math.min(max, Math.max(min, value));
+const sanitizeScoreInput = (value: number) =>
+  clamp(Math.trunc(value), SCORE_MIN, SCORE_MAX);
 const makeId = () =>
   typeof crypto !== 'undefined' && 'randomUUID' in crypto
     ? crypto.randomUUID()
@@ -167,6 +173,22 @@ export function ScoreBoard({
   const [gameStarted, setGameStarted] = useState<boolean>(() =>
     Boolean(initialRounds && initialRounds.length)
   );
+  const [activeWheel, setActiveWheel] = useState<{
+    roundIndex: number;
+    playerIndex: number;
+  } | null>(null);
+  useEffect(() => {
+    if (!activeWheel) {
+      return;
+    }
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setActiveWheel(null);
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [activeWheel]);
   const totals = useMemo(() => {
     return players.map((player, playerIndex) => {
       const scoreSum = rounds.reduce(
@@ -238,29 +260,48 @@ export function ScoreBoard({
       )
     );
   }, []);
-  const handleScoreChange = useCallback(
-    (
-      roundIndex: number,
-      playerIndex: number,
-      event: ChangeEvent<HTMLInputElement>
-    ) => {
-      const value = event.target.value === '' ? 0 : Number(event.target.value);
-      const nextValue = Number.isNaN(value) ? 0 : clamp(value, 0, 999);
+  const updateScoreValue = useCallback(
+    (roundIndex: number, playerIndex: number, nextValue: number) => {
+      const sanitized = sanitizeScoreInput(nextValue);
       setRounds((prev) =>
         prev.map((round, index) =>
           index === roundIndex
             ? {
                 ...round,
                 scores: round.scores.map((score, idx) =>
-                  idx === playerIndex ? nextValue : score
+                  idx === playerIndex ? sanitized : score
                 )
               }
             : round
         )
       );
-      if (nextValue > 0) {
+      if (sanitized !== 0) {
         markGameStarted();
       }
+    },
+    [markGameStarted]
+  );
+
+  const adjustScoreValue = useCallback(
+    (roundIndex: number, playerIndex: number, delta: number) => {
+      if (delta === 0) {
+        return;
+      }
+      setRounds((prev) =>
+        prev.map((round, index) =>
+          index === roundIndex
+            ? {
+                ...round,
+                scores: round.scores.map((score, idx) =>
+                  idx === playerIndex
+                    ? sanitizeScoreInput((score ?? 0) + delta)
+                    : score
+                )
+              }
+            : round
+        )
+      );
+      markGameStarted();
     },
     [markGameStarted]
   );
@@ -296,7 +337,11 @@ export function ScoreBoard({
   const disablePlayerControls = gameStarted;
   return (
     <div className="scoreboard-wrapper">
-      <div className="scoreboard-card" role="table" aria-label={title}>
+      <div
+        className={`scoreboard-card${activeWheel ? ' blurred' : ''}`}
+        role="table"
+        aria-label={title}
+      >
         <header className="scoreboard-header">
           <div className="scoreboard-header-info">
             <h2 className="scoreboard-title">{title}</h2>
@@ -399,22 +444,42 @@ export function ScoreBoard({
                 gridTemplateColumns: `repeat(${players.length}, minmax(0, 1fr)) auto`
               }}
             >
-              {players.map((_, playerIndex) => (
-                <input
-                  key={`${round.id}-${playerIndex}`}
-                  type="number"
-                  min={0}
-                  max={999}
-                  value={round.scores[playerIndex] ?? 0}
-                  onChange={(event) =>
-                    handleScoreChange(roundIndex, playerIndex, event)
-                  }
-                  aria-label={`Round ${roundIndex + 1} score for ${
-                    players[playerIndex].name
-                  }`}
-                  className="scoreboard-score-input"
-                />
-              ))}
+              {players.map((_, playerIndex) => {
+                const value = round.scores[playerIndex] ?? 0;
+                const isActive =
+                  activeWheel?.roundIndex === roundIndex &&
+                  activeWheel?.playerIndex === playerIndex;
+                return (
+                  <div
+                    key={`${round.id}-${playerIndex}`}
+                    className={`scoreboard-score-cell${
+                      isActive ? ' active' : ''
+                    }`}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Round ${roundIndex + 1} score for ${
+                      players[playerIndex].name
+                    }`}
+                    onClick={() =>
+                      setActiveWheel({ roundIndex, playerIndex })
+                    }
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        setActiveWheel({ roundIndex, playerIndex });
+                      } else if (event.key === 'ArrowUp') {
+                        event.preventDefault();
+                        adjustScoreValue(roundIndex, playerIndex, 1);
+                      } else if (event.key === 'ArrowDown') {
+                        event.preventDefault();
+                        adjustScoreValue(roundIndex, playerIndex, -1);
+                      }
+                    }}
+                  >
+                    <span className="scoreboard-score-display">{value}</span>
+                  </div>
+                );
+              })}
               <button
                 type="button"
                 aria-label={`Delete round ${roundIndex + 1}`}
@@ -515,6 +580,164 @@ export function ScoreBoard({
           <span>Lowest score wins</span>
         </footer>
       </div>
+
+      {activeWheel && (
+        <WheelOverlay
+          player={players[activeWheel.playerIndex]}
+          roundLabel={`Round ${activeWheel.roundIndex + 1}`}
+          initialValue={
+            rounds[activeWheel.roundIndex]?.scores[activeWheel.playerIndex] ?? 0
+          }
+          onClose={() => setActiveWheel(null)}
+          onConfirm={(nextValue) => {
+            updateScoreValue(
+              activeWheel.roundIndex,
+              activeWheel.playerIndex,
+              nextValue
+            );
+          }}
+        />
+      )}
     </div>
   );
+}
+
+interface WheelOverlayProps {
+  player: Player;
+  roundLabel: string;
+  initialValue: number;
+  onClose: () => void;
+  onConfirm: (value: number) => void;
+}
+
+function WheelOverlay({
+  player,
+  roundLabel,
+  initialValue,
+  onClose,
+  onConfirm
+}: WheelOverlayProps): ReactElement {
+  const [selection, setSelection] = useState(initialValue);
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setSelection(initialValue);
+  }, [initialValue]);
+
+  useEffect(() => {
+    modalRef.current?.focus();
+  }, []);
+
+  const adjustSelection = useCallback((delta: number) => {
+    if (delta === 0) {
+      return;
+    }
+    setSelection((prev) => sanitizeScoreInput(prev + delta));
+  }, []);
+
+  const handleWheel = useCallback(
+    (event: WheelEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      const direction = event.deltaY < 0 ? 1 : event.deltaY > 0 ? -1 : 0;
+      adjustSelection(direction);
+    },
+    [adjustSelection]
+  );
+
+  const handleKeyDown = useCallback(
+    (event: ReactKeyboardEvent<HTMLDivElement>) => {
+      if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        adjustSelection(1);
+      } else if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        adjustSelection(-1);
+      } else if (event.key === 'Enter') {
+        event.preventDefault();
+        onConfirm(selection);
+        onClose();
+      } else if (event.key === 'Escape') {
+        onClose();
+      }
+    },
+    [adjustSelection, selection, onClose, onConfirm]
+  );
+
+  const handleConfirm = useCallback(() => {
+    onConfirm(selection);
+    onClose();
+  }, [selection, onConfirm, onClose]);
+
+  const previewValues = useMemo(
+    () => createPreviewValues(selection),
+    [selection]
+  );
+
+  return (
+    <div
+      className="scoreboard-wheel-overlay"
+      role="dialog"
+      aria-modal="true"
+      onClick={onClose}
+    >
+      <div
+        className="scoreboard-wheel-modal"
+        tabIndex={-1}
+        ref={modalRef}
+        onClick={(event) => event.stopPropagation()}
+        onKeyDown={handleKeyDown}
+      >
+        <header className="scoreboard-wheel-header">
+          <div>
+            <p className="scoreboard-wheel-label">{roundLabel}</p>
+            <h3 className="scoreboard-wheel-player">{player.name}</h3>
+          </div>
+          <button
+            type="button"
+            aria-label="Close score selector"
+            className="scoreboard-wheel-close"
+            onClick={onClose}
+          >
+            ×
+          </button>
+        </header>
+        <div
+          className="scoreboard-wheel"
+          onWheel={handleWheel}
+          role="listbox"
+          aria-activedescendant="wheel-value-active"
+        >
+          {previewValues.map((wheelValue, index) => {
+            const isCurrent =
+              index === Math.floor(previewValues.length / 2) ||
+              wheelValue === selection;
+            return (
+              <button
+                type="button"
+                key={`${wheelValue}-${index}`}
+                id={isCurrent ? 'wheel-value-active' : undefined}
+                className={`scoreboard-wheel-item${
+                  isCurrent ? ' current' : ''
+                }`}
+                onClick={() =>
+                  isCurrent ? handleConfirm() : setSelection(wheelValue)
+                }
+              >
+                {wheelValue}
+              </button>
+            );
+          })}
+        </div>
+        <p className="scoreboard-wheel-hint">
+          Scroll or use ↑/↓ to move through numbers. Click the highlighted value
+          to set it.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function createPreviewValues(current: number): number[] {
+  const offsets = [-2, -1, 0, 1, 2];
+  return offsets.map((offset) => sanitizeScoreInput(current + offset));
 }
