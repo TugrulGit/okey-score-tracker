@@ -5,10 +5,8 @@
   --scoreboard-body-size: 1em;
   --scoreboard-label-size: 0.85em;
   --scoreboard-small-size: 0.75em;
-  /* --scoreboard-heading-color: rgba(255, 255, 255, 0.95); */
-  /* --scoreboard-text-color: rgba(255, 255, 255, 0.9); */
-  --scoreboard-heading-color: var(--color-honolulu-blue, black);
-  --scoreboard-text-color: rgb(58, 48, 0);
+  --scoreboard-heading-color: rgba(255, 255, 255, 0.95);
+  --scoreboard-text-color: rgba(255, 255, 255, 0.9);
   --scoreboard-muted-text-color: rgba(255, 255, 255, 0.7);
   --scoreboard-border-light: 1px solid rgba(255, 255, 255, 0.35);
   --scoreboard-border-pill: 1px solid rgba(255, 255, 255, 0.4);
@@ -17,9 +15,6 @@
   --scoreboard-radius-lg: 24px;
   --scoreboard-radius-md: 20px;
   --scoreboard-radius-pill: 16px;
-}
-* {
-  color: var(--scoreboard-text-color);
 }
 
 .scoreboard-wrapper {
@@ -218,11 +213,11 @@
   border: var(--scoreboard-border-pill);
   background: rgba(255, 255, 255, 0.22);
   box-shadow: var(--scoreboard-shadow-pill);
-  padding: 0.25rem;
+  padding: 0.75rem 0.5rem;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 64px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.45rem;
   cursor: pointer;
 }
 
@@ -233,6 +228,63 @@
 
 .scoreboard-score-display {
   font-size: 1.25em;
+  font-weight: 600;
+  text-align: center;
+}
+
+.scoreboard-penalty-symbols {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.25rem;
+  justify-items: center;
+}
+
+.scoreboard-penalty-symbol {
+  border: none;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  padding: 0.2rem 0;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.scoreboard-penalty-symbol:hover {
+  background: rgba(255, 255, 255, 0.35);
+  transform: translateY(-1px);
+}
+
+.scoreboard-penalty-tags {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
+}
+
+.scoreboard-penalty-tag {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: var(--scoreboard-radius-pill);
+  padding: 0.15rem 0.5rem;
+  font-size: 0.9rem;
+  color: #fff;
+}
+
+.scoreboard-penalty-tag button {
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.scoreboard-penalty-total {
+  margin-top: 0.35rem;
+  font-size: 0.85em;
+  text-align: center;
+  color: var(--scoreboard-heading-color);
   font-weight: 600;
 }
 
@@ -282,11 +334,13 @@
 
 .scoreboard-wheel-modal {
   width: min(420px, 100%);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: var(--scoreboard-radius-lg);
   border: var(--scoreboard-border-light);
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
   padding: 1.5rem;
   color: #fff;
+  backdrop-filter: blur(20px) saturate(180%);
 }
 
 .scoreboard-wheel-header {
@@ -307,6 +361,12 @@
   font-size: 1.5em;
 }
 
+.scoreboard-wheel-context {
+  margin: 0.25rem 0 0;
+  font-size: var(--scoreboard-label-size);
+  color: var(--scoreboard-muted-text-color);
+}
+
 .scoreboard-wheel-close {
   border: none;
   background: transparent;
@@ -321,6 +381,42 @@
   font-size: var(--scoreboard-small-size);
   color: var(--scoreboard-muted-text-color);
   text-align: center;
+}
+
+.scoreboard-penalty-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.scoreboard-penalty-summary-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.85rem;
+  border-radius: var(--scoreboard-radius-pill);
+  background: rgba(255, 255, 255, 0.08);
+  border: var(--scoreboard-border-light);
+}
+
+.scoreboard-penalty-summary-values {
+  color: #fff;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.scoreboard-penalty-summary-item {
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: var(--scoreboard-radius-pill);
+  padding: 0.4rem 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 120px;
+  background: rgba(0, 0, 0, 0.15);
+  font-weight: 600;
 }
 
 .scoreboard-round-delete {
@@ -372,22 +468,6 @@
   font-size: 13px;
 }
 
-.scoreboard-penalty-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.scoreboard-penalty-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  align-items: center;
-  border-radius: 16px;
-  padding: 10px 12px;
-  background: rgba(255, 255, 255, 0.12);
-}
-
 .scoreboard-penalty-info {
   min-width: 160px;
 }
@@ -399,41 +479,6 @@
 .scoreboard-penalty-copy {
   margin: 4px 0 0;
   font-size: 13px;
-}
-
-.scoreboard-penalty-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  flex: 1;
-}
-
-.scoreboard-penalty-button {
-  border-radius: 16px;
-  padding: 10px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0.18);
-  color: #fff;
-  font-weight: 600;
-  cursor: pointer;
-  min-width: 110px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-}
-
-.scoreboard-penalty-player {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.scoreboard-penalty-player-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  display: inline-block;
 }
 
 .scoreboard-totals {
