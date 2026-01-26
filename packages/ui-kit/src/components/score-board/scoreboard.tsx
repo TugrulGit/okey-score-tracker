@@ -1,3 +1,4 @@
+// === React & Internal Imports ===
 import {
   WheelEvent,
   ReactElement,
@@ -11,12 +12,15 @@ import {
 } from 'react';
 import '../../themes/palette.css';
 import './scoreboard.css';
+import { GlassButton } from '../buttons/GlassButton';
+// Palette accents per player slot; used for player cards and summary chips.
 const PLAYER_ACCENTS = [
   'var(--color-honolulu-blue, #007cbeff)',
   'var(--color-gold, #ffd639ff)',
   'var(--color-selective-yellow, #fbaf00ff)',
   'var(--color-pigment-green, #00af54ff)'
 ];
+// Metadata for penalty types shown in cells & summary.
 const PENALTY_TYPES = [
   {
     id: 'misplay',
@@ -59,6 +63,8 @@ interface Round {
   scores: number[];
 }
 type PenaltyState = Record<string, Record<PenaltyId, number>>;
+
+// Per-round penalty entries so each cell shows its penalties inline.
 interface PenaltyEntry {
   id: string;
   type: PenaltyId;
@@ -82,6 +88,7 @@ export interface ScoreBoardProps {
   initialPenalties?: Array<Partial<Record<PenaltyId, number>>>;
   onStateChange?: (snapshot: ScoreBoardSnapshot) => void;
 }
+// === Utility helpers ===
 const clamp = (value: number, min: number, max: number) =>
   Math.min(max, Math.max(min, value));
 const sanitizeScoreInput = (value: number) =>
@@ -90,6 +97,7 @@ const makeId = () =>
   typeof crypto !== 'undefined' && 'randomUUID' in crypto
     ? crypto.randomUUID()
     : `id-${Math.random().toString(36).slice(2, 9)}`;
+// Tracks which wheel modal is open (score vs. penalty).
 type WheelContext =
   | {
       kind: 'score';
@@ -104,6 +112,7 @@ type WheelContext =
       penaltyType: PenaltyId;
       initialValue: number;
     };
+// --- Seed builders ---
 const buildPlayerSeed = (
   targetCount: number,
   providedNames?: string[]
@@ -172,6 +181,8 @@ const getAccent = (index: number) =>
   PLAYER_ACCENTS[index] ??
   PLAYER_ACCENTS[PLAYER_ACCENTS.length - 1] ??
   '#007cbeff';
+// === Main ScoreBoard component ===
+// Renders the full glassy scoreboard, handles players, scores, penalties, and the wheel modal.
 export function ScoreBoard({
   title = 'Okey Score Table',
   minPlayers = 2,
@@ -201,6 +212,7 @@ export function ScoreBoard({
   );
   const [roundPenalties, setRoundPenalties] = useState<RoundPenaltyMap>({});
   const [wheelContext, setWheelContext] = useState<WheelContext | null>(null);
+  // Locks scroll + listens for escape while a wheel is open.
   useEffect(() => {
     if (!wheelContext) {
       document.body.style.overflow = '';
@@ -219,6 +231,7 @@ export function ScoreBoard({
       window.removeEventListener('keydown', handleEsc);
     };
   }, [wheelContext]);
+  // Aggregates penalties per type and total per player for UI.
   const penaltyData = useMemo(() => {
     const perType = players.map(() => ({
       misplay: 0,
@@ -242,6 +255,7 @@ export function ScoreBoard({
 
   const { perType: penaltyPerType, sums: penaltySums } = penaltyData;
 
+  // Combines base score with penalty totals for overall ranking.
   const totals = useMemo(() => {
     return players.map((player, playerIndex) => {
       const scoreSum = rounds.reduce(
@@ -268,6 +282,7 @@ export function ScoreBoard({
   const markGameStarted = useCallback(() => {
     setGameStarted((prev) => (prev ? prev : true));
   }, []);
+  // --- Player management handlers ---
   const handlePlayerCountChange = useCallback(
     (count: number) => {
       if (gameStarted) {
@@ -309,6 +324,7 @@ export function ScoreBoard({
       )
     );
   }, []);
+  // --- Score mutations ---
   const updateScoreValue = useCallback(
     (roundIndex: number, playerIndex: number, nextValue: number) => {
       const sanitized = sanitizeScoreInput(nextValue);
@@ -355,6 +371,7 @@ export function ScoreBoard({
     [markGameStarted]
   );
 
+  // --- Wheel context openers ---
   const openScoreWheel = useCallback(
     (roundIndex: number, playerIndex: number) => {
       const initialValue = rounds[roundIndex]?.scores[playerIndex] ?? 0;
@@ -381,6 +398,7 @@ export function ScoreBoard({
     []
   );
 
+  // Records penalty entries per cell and updates aggregated totals.
   const applyPenaltyValue = useCallback(
     (
       roundIndex: number,
@@ -422,6 +440,12 @@ export function ScoreBoard({
     [players, rounds]
   );
 
+  // --- Penalty removal & round lifecycle ---
+  /**
+   * Removes a single penalty chip from both the per-round map and the aggregate
+   * penalty ledger when the inline "×" button is clicked. This keeps the inline
+   * tags, summary view, and totals in sync while preventing negative counts.
+   */
   const handleRemovePenaltyEntry = useCallback(
     (
       roundIndex: number,
@@ -460,17 +484,33 @@ export function ScoreBoard({
     [players, rounds]
   );
 
+  /**
+   * Appends a fresh round scaffold sized to the current player count. Triggered
+   * by the "+ Add round" button so players can keep extending a running game.
+   */
   const handleAddRound = useCallback(() => {
     setRounds((prev) => [...prev, createEmptyRound(players.length)]);
   }, [players.length]);
+  /**
+   * Deletes the selected round card unless it is the lone remaining round. Used
+   * by the trash icon rendered within each round row to prune mistakes.
+   */
   const handleDeleteRound = useCallback((roundId: string) => {
     setRounds((prev) =>
       prev.length > 1 ? prev.filter((round) => round.id !== roundId) : prev
     );
   }, []);
+  /**
+   * Locks the player configuration and pushes the view into "in-progress" mode.
+   * Activated by the Start button so we know when to disable player controls.
+   */
   const handleStartGame = useCallback(() => {
     setGameStarted(true);
   }, []);
+  /**
+   * Resets the board to a pristine state: wipes rounds, penalties, and the
+   * per-round penalty map, and unlocks player controls. Used by the Reset CTA.
+   */
   const handleResetGame = useCallback(() => {
     setRounds([createEmptyRound(players.length)]);
     setPenalties(syncPenaltyState(players, {}));
@@ -478,6 +518,10 @@ export function ScoreBoard({
     setGameStarted(false);
   }, [players]);
   const disablePlayerControls = gameStarted;
+  /**
+   * Flattens the per-round penalty entries into totals per player/per penalty
+   * type. Drives the "Penalty Summary" section so users see cumulative impact.
+   */
   const penaltySummary = useMemo(() => {
     const totals = players.map(() => ({
       misplay: 0,
@@ -511,21 +555,15 @@ export function ScoreBoard({
             </p>
           </div>
           <div className="scoreboard-actions">
-            <button
-              type="button"
+            <GlassButton
               onClick={handleStartGame}
               disabled={gameStarted}
-              className="scoreboard-start-btn"
             >
               {gameStarted ? 'Game Locked' : 'Start Game'}
-            </button>
-            <button
-              type="button"
-              onClick={handleResetGame}
-              className="scoreboard-reset-btn"
-            >
+            </GlassButton>
+            <GlassButton tone="secondary" onClick={handleResetGame}>
               Reset
-            </button>
+            </GlassButton>
           </div>
         </header>
         <section
@@ -842,6 +880,12 @@ interface WheelOverlayProps {
   onConfirm: (value: number) => void;
 }
 
+// === WheelOverlay ===
+/**
+ * Internal-only modal used by ScoreBoard for both score and penalty editing.
+ * Provides scrolling/keyboard gestures, focus trapping, and surfaces selection
+ * updates via callbacks so parent state remains the source of truth.
+ */
 function WheelOverlay({
   player,
   roundLabel,
@@ -850,6 +894,10 @@ function WheelOverlay({
   onClose,
   onConfirm
 }: WheelOverlayProps): ReactElement {
+  /**
+   * Local selection state mirrors the wheel's highlighted number while the
+   * modal is open. Updated via scroll, keyboard, or clicking alternative values.
+   */
   const [selection, setSelection] = useState(initialValue);
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -973,6 +1021,10 @@ function WheelOverlay({
   );
 }
 
+/**
+ * Builds the +/- preview series shown around the focused wheel value. Internal
+ * helper scoped to WheelOverlay so our modal logic stays co-located.
+ */
 function createPreviewValues(current: number): number[] {
   const offsets = [-2, -1, 0, 1, 2];
   return offsets.map((offset) => sanitizeScoreInput(current + offset));
