@@ -25,4 +25,12 @@ body {
   --salmon-pink: hsla(352, 100%, 82%, 1);
   --honolulu-blue: hsla(201, 100%, 37%, 1);
   --pigment-green: hsla(149, 100%, 34%, 1);
+
+  /* Landing page layout tokens */
+  --landing-radius-xl: 36px;
+  --landing-radius-lg: 28px;
+  --landing-border: 1px solid rgba(255, 255, 255, 0.5);
+  --landing-shadow: 0 35px 80px rgba(15, 23, 42, 0.25);
+  --landing-border-color: rgba(255, 255, 255, 0.5);
+  --landing-shadow-color: rgba(15, 23, 42, 0.25);
 }

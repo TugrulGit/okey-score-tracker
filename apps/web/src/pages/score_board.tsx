@@ -27,9 +27,9 @@ export default function ScoreBoardPage() {
             { scores: [42, 80, 68, 100] }
           ]}
           initialPenalties={[
-            { misplay: 0, okeyToOpponent: 0, slowPlay: 0 },
-            { misplay: 1, okeyToOpponent: 0, slowPlay: 0 },
-            { misplay: 0, okeyToOpponent: 1, slowPlay: 0 }
+            { misplay: 0, okeyToOpponent: 0, finisher: 0 },
+            { misplay: 1, okeyToOpponent: 0, finisher: 0 },
+            { misplay: 0, okeyToOpponent: 1, finisher: 0 }
           ]}
         />
       </main>

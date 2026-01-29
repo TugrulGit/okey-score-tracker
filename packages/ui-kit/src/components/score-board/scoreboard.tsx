@@ -83,9 +83,9 @@ export interface ScoreBoardProps {
   title?: string;
   minPlayers?: number;
   maxPlayers?: number;
-  initialPlayers?: string[];
-  initialRounds?: Array<{ scores: number[] }>;
-  initialPenalties?: Array<Partial<Record<PenaltyId, number>>>;
+  initialPlayers?: ReadonlyArray<string>;
+  initialRounds?: ReadonlyArray<{ scores: ReadonlyArray<number> }>;
+  initialPenalties?: ReadonlyArray<Partial<Record<PenaltyId, number>>>;
   onStateChange?: (snapshot: ScoreBoardSnapshot) => void;
 }
 // === Utility helpers ===
@@ -115,13 +115,16 @@ type WheelContext =
 // --- Seed builders ---
 const buildPlayerSeed = (
   targetCount: number,
-  providedNames?: string[]
+  providedNames?: ReadonlyArray<string>
 ): Player[] =>
   Array.from({ length: targetCount }, (_, index) => ({
     id: `player-${index + 1}-${makeId()}`,
     name: providedNames?.[index] ?? `Player ${index + 1}`
   }));
-const adjustScores = (scores: number[], playerCount: number): number[] => {
+const adjustScores = (
+  scores: ReadonlyArray<number>,
+  playerCount: number
+): number[] => {
   const next = scores
     .slice(0, playerCount)
     .map((value) => clamp(value, 0, 999));
@@ -136,7 +139,7 @@ const createEmptyRound = (playerCount: number): Round => ({
 });
 const buildInitialRounds = (
   playerCount: number,
-  initialRounds?: Array<{ scores: number[] }>
+  initialRounds?: ReadonlyArray<{ scores: ReadonlyArray<number> }>
 ): Round[] => {
   if (initialRounds && initialRounds.length > 0) {
     return initialRounds.map((round) => ({
@@ -148,7 +151,7 @@ const buildInitialRounds = (
 };
 const buildInitialPenalties = (
   players: Player[],
-  initialPenalties?: Array<Partial<Record<PenaltyId, number>>>
+  initialPenalties?: ReadonlyArray<Partial<Record<PenaltyId, number>>>
 ): PenaltyState => {
   return players.reduce<PenaltyState>((acc, player, index) => {
     acc[player.id] = PENALTY_TYPES.reduce<Record<PenaltyId, number>>(

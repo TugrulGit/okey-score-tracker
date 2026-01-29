@@ -1,0 +1,158 @@
+.page {
+  min-height: 100vh;
+  background: radial-gradient(
+      circle at 20% 20%,
+      rgba(255, 214, 57, 0.25),
+      transparent 45%
+    ),
+    radial-gradient(circle at 80% 0%, rgba(0, 124, 190, 0.25), transparent 50%),
+    #f4f6fb;
+  color: rgba(8, 17, 31, 0.9);
+  padding: 4rem clamp(1rem, 4vw, 3rem) 6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+.auras {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.aura {
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.75;
+}
+
+.auraOne {
+  background: rgba(0, 124, 190, 0.4);
+  top: -120px;
+  left: -80px;
+}
+
+.auraTwo {
+  background: rgba(255, 163, 175, 0.35);
+  bottom: 40px;
+  right: 12%;
+}
+
+.auraThree {
+  background: rgba(255, 214, 57, 0.35);
+  bottom: -140px;
+  left: 10%;
+}
+
+.section {
+  width: 100%;
+  max-width: 1100px;
+  position: relative;
+  z-index: 1;
+}
+
+.glassCard {
+  border-radius: var(--landing-radius-xl);
+  overflow: hidden;
+  border: var(--landing-border);
+  box-shadow: var(--landing-shadow);
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(28px) saturate(160%);
+  padding: clamp(2rem, 5vw, 3.5rem);
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(8, 17, 31, 0.6);
+  margin-bottom: 1rem;
+}
+
+.ctaButton {
+  min-width: 220px;
+}
+
+.featuresSection {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+}
+
+.sectionTitle {
+  font-size: 2rem;
+  margin: 0 0 0.75rem;
+}
+
+.sectionCopy {
+  margin: 0;
+  font-size: 1rem;
+  color: rgba(9, 13, 35, 0.75);
+}
+
+.featuresGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+
+.showcaseSection {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  align-items: center;
+}
+
+.showcaseCopy {
+  max-width: 420px;
+}
+
+.showcaseList {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  color: rgba(9, 13, 35, 0.65);
+  font-weight: 600;
+}
+
+.scoreboardPreview {
+  border-radius: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.65);
+  box-shadow: 0 35px 80px rgba(15, 23, 42, 0.25);
+  padding: 1.5rem;
+}
+
+.previewHint {
+  margin-top: 1rem;
+  text-align: center;
+  color: rgba(9, 13, 35, 0.6);
+  font-size: 0.9rem;
+}
+
+.textLinkButton {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .glassCard {
+    padding: 1.75rem;
+  }
+}
