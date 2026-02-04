@@ -72,7 +72,16 @@ export default function LandingPage(): ReactElement {
 
   const handleSecondaryCta = () => {
     const featuresSection = document.getElementById('features');
-    featuresSection?.scrollIntoView({ behavior: 'smooth' });
+    if (!featuresSection) {
+      return;
+    }
+    const offset = 64; // match the main page padding so the hero stays fully visible when scrolling back
+    const targetTop =
+      featuresSection.getBoundingClientRect().top + window.scrollY - offset;
+    window.scrollTo({
+      top: Math.max(targetTop, 0),
+      behavior: 'smooth'
+    });
   };
 
   return (
@@ -91,7 +100,7 @@ export default function LandingPage(): ReactElement {
           <span className={`${styles.aura} ${styles.auraThree}`} />
         </div>
 
-        <section className={`${styles.section} ${styles.glassCard}`}>
+        <section className={`${styles.section} ${styles.glassCard} ${styles.heroSection}`}>
           <HeroPanel
             eyebrow="Nightly scoreboard, perfected"
             title="Track every round of Okey with a floating, glassy control center."

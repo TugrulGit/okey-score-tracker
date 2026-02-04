@@ -4,6 +4,13 @@
   --landing-muted-text: rgba(8, 17, 31, 0.65);
   --landing-card-border: 1px solid rgba(255, 255, 255, 0.4);
   --landing-card-bg: rgba(255, 255, 255, 0.35);
+
+  --landing-section-background: linear-gradient(
+    120deg,
+    rgba(0, 124, 190, 0.7),
+    rgba(255, 163, 175, 0.6),
+    rgba(255, 214, 57, 0.6)
+  );
 }
 
 .landing-hero {
@@ -113,15 +120,9 @@
   color: #fff;
   width: 100%;
   max-width: 1100px;
-  border: var(--landing-border, 1px solid rgba(255, 255, 255, 0.5));
   box-shadow: var(--landing-shadow, 0 35px 80px rgba(15, 23, 42, 0.25));
   backdrop-filter: blur(28px) saturate(160%);
-  background: linear-gradient(
-    120deg,
-    rgba(0, 124, 190, 0.7),
-    rgba(255, 163, 175, 0.6),
-    rgba(255, 214, 57, 0.6)
-  );
+  background: var(--landing-section-background);
 }
 
 .landing-cta__eyebrow {

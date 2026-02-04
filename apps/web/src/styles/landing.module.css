@@ -70,6 +70,21 @@
   padding: clamp(2rem, 5vw, 3.5rem);
 }
 
+.heroSection {
+  background: linear-gradient(
+    120deg,
+    rgba(0, 124, 190, 0.7),
+    rgba(255, 163, 175, 0.6),
+    rgba(255, 214, 57, 0.6)
+  );
+  color: #fff;
+  border: none;
+  --landing-hero-text: rgba(255, 255, 255, 0.95);
+  --landing-muted-text: rgba(255, 255, 255, 0.78);
+  --landing-card-border: 1px solid rgba(255, 255, 255, 0.5);
+  --landing-card-bg: rgba(255, 255, 255, 0.2);
+}
+change the f-ing styling to use global or paleette wtf is this shize
 .eyebrow {
   text-transform: uppercase;
   letter-spacing: 0.2em;
@@ -105,7 +120,6 @@
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1rem;
 }
-
 
 .showcaseSection {
   display: grid;
