@@ -1,16 +1,29 @@
 * {
   box-sizing: border-box;
 }
+
 #__next {
   height: 100%;
 }
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial,
-    sans-serif;
+  font-family: var(
+    --font-family-base,
+    'Inter',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif
+  );
   background: #fdfcfb;
+  color: var(--font-color-primary, rgba(8, 17, 31, 0.9));
+  line-height: 1.5;
 }
+
 :root {
   /* CSS HEX */
   --selective-yellow: #fbaf00ff;
@@ -33,4 +46,22 @@ body {
   --landing-shadow: 0 35px 80px rgba(15, 23, 42, 0.25);
   --landing-border-color: rgba(255, 255, 255, 0.5);
   --landing-shadow-color: rgba(15, 23, 42, 0.25);
+
+  /* Typography (rem + clamp for responsiveness) */
+  --font-family-base: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto,
+    Helvetica, Arial, sans-serif;
+  --font-size-body: clamp(0.95rem, 0.15vw + 0.9rem, 1.05rem);
+  --font-size-label: clamp(0.78rem, 0.1vw + 0.74rem, 0.88rem);
+  --font-size-eyebrow: clamp(0.66rem, 0.08vw + 0.62rem, 0.76rem);
+  --font-size-heading-md: clamp(1.3rem, 0.6vw + 1.05rem, 2rem);
+  --font-size-heading-lg: clamp(1.65rem, 0.9vw + 1.3rem, 2.35rem);
+  --font-size-heading-xl: clamp(2rem, 1.8vw + 1.4rem, 3rem);
+  --font-size-landing-hero-title: clamp(2.15rem, 2.2vw + 1.7rem, 3rem);
+  --font-size-landing-hero-lede: clamp(0.95rem, 0.25vw + 0.9rem, 1.2rem);
+
+  /* Font colors */
+  --font-color-primary: rgba(8, 17, 31, 0.9);
+  --font-color-muted: rgba(8, 17, 31, 0.62);
+  --font-color-inverse: rgba(255, 255, 255, 0.95);
+  --font-color-inverse-muted: rgba(255, 255, 255, 0.78);
 }

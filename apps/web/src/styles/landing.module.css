@@ -7,7 +7,7 @@
     ),
     radial-gradient(circle at 80% 0%, rgba(0, 124, 190, 0.25), transparent 50%),
     #f4f6fb;
-  color: rgba(8, 17, 31, 0.9);
+  color: var(--font-color-primary, rgba(8, 17, 31, 0.9));
   padding: 4rem clamp(1rem, 4vw, 3rem) 6rem;
   display: flex;
   flex-direction: column;
@@ -16,7 +16,14 @@
   position: relative;
   overflow: hidden;
   isolation: isolate;
-  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family: var(
+    --font-family-base,
+    'Inter',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif
+  );
 }
 
 .auras {
@@ -84,15 +91,6 @@
   --landing-card-border: 1px solid rgba(255, 255, 255, 0.5);
   --landing-card-bg: rgba(255, 255, 255, 0.2);
 }
-change the f-ing styling to use global or paleette wtf is this shize
-.eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: rgba(8, 17, 31, 0.6);
-  margin-bottom: 1rem;
-}
 
 .ctaButton {
   min-width: 220px;
@@ -105,14 +103,20 @@ change the f-ing styling to use global or paleette wtf is this shize
 }
 
 .sectionTitle {
-  font-size: 2rem;
+  font-size: var(
+    --font-size-heading-lg,
+    clamp(1.65rem, 0.9vw + 1.3rem, 2.35rem)
+  );
   margin: 0 0 0.75rem;
 }
 
 .sectionCopy {
   margin: 0;
-  font-size: 1rem;
-  color: rgba(9, 13, 35, 0.75);
+  font-size: var(
+    --font-size-body,
+    clamp(0.95rem, 0.15vw + 0.9rem, 1.05rem)
+  );
+  color: var(--font-color-muted, rgba(9, 13, 35, 0.75));
 }
 
 .featuresGrid {
@@ -137,7 +141,7 @@ change the f-ing styling to use global or paleette wtf is this shize
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
-  color: rgba(9, 13, 35, 0.65);
+  color: var(--font-color-muted, rgba(9, 13, 35, 0.65));
   font-weight: 600;
 }
 
@@ -152,8 +156,11 @@ change the f-ing styling to use global or paleette wtf is this shize
 .previewHint {
   margin-top: 1rem;
   text-align: center;
-  color: rgba(9, 13, 35, 0.6);
-  font-size: 0.9rem;
+  color: var(--font-color-muted, rgba(9, 13, 35, 0.6));
+  font-size: var(
+    --font-size-label,
+    clamp(0.78rem, 0.1vw + 0.74rem, 0.88rem)
+  );
 }
 
 .textLinkButton {
@@ -165,8 +172,84 @@ change the f-ing styling to use global or paleette wtf is this shize
   cursor: pointer;
 }
 
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: var(
+    --font-size-eyebrow,
+    clamp(0.66rem, 0.08vw + 0.62rem, 0.76rem)
+  );
+  font-weight: 600;
+  color: var(--font-color-muted, rgba(8, 17, 31, 0.6));
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 1024px) {
+  .page {
+    padding: 3rem 2rem 4rem;
+    gap: 2.5rem;
+  }
+
+  .glassCard {
+    padding: 2.25rem;
+  }
+
+  .showcaseSection {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+}
+
 @media (max-width: 768px) {
+  .page {
+    padding: 2.5rem 1.5rem 3rem;
+    gap: 2rem;
+  }
+
   .glassCard {
     padding: 1.75rem;
+  }
+
+  .featuresGrid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+
+  .showcaseSection {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .showcaseCopy {
+    max-width: 100%;
+  }
+
+  .scoreboardPreview {
+    padding: 1.25rem;
+  }
+
+  .ctaButton {
+    width: 100%;
+  }
+}
+
+@media (max-width: 560px) {
+  .page {
+    padding: 2rem 1rem 2.5rem;
+    gap: 1.5rem;
+  }
+
+  .glassCard {
+    padding: 1.5rem;
+    border-radius: 28px;
+  }
+
+  .sectionTitle,
+  .sectionCopy,
+  .eyebrow {
+    text-align: left;
+  }
+
+  .textLinkButton {
+    width: 100%;
+    text-align: left;
+    padding: 0;
   }
 }
