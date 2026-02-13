@@ -100,7 +100,9 @@ export default function LandingPage(): ReactElement {
           <span className={`${styles.aura} ${styles.auraThree}`} />
         </div>
 
-        <section className={`${styles.section} ${styles.glassCard} ${styles.heroSection}`}>
+        <section
+          className={`${styles.section} ${styles.glassCard} ${styles.heroSection}`}
+        >
           <HeroPanel
             eyebrow="Nightly scoreboard, perfected"
             title="Track every round of Okey with a floating, glassy control center."
@@ -135,8 +137,8 @@ export default function LandingPage(): ReactElement {
             <p className={styles.eyebrow}>Why players switch</p>
             <h2 className={styles.sectionTitle}>Scores stay honest.</h2>
             <p className={styles.sectionCopy}>
-              Structured rounds, penalty tags, and smart totals bring clarity to any
-              Okey marathon. No more fuzzy math at 2am.
+              Structured rounds, penalty tags, and smart totals bring clarity to
+              any Okey marathon. No more fuzzy math at 2am.
             </p>
           </div>
           <div className={styles.featuresGrid}>
@@ -151,21 +153,24 @@ export default function LandingPage(): ReactElement {
           </div>
         </section>
 
-        <section className={`${styles.section} ${styles.glassCard} ${styles.showcaseSection}`}>
-          <div className={styles.showcaseCopy}>
+        <div className={styles.showcaseLayout}>
+          <section
+            className={`${styles.section} ${styles.glassCard} ${styles.showcaseSection}`}
+          >
             <p className={styles.eyebrow}>Live preview</p>
             <h2 className={styles.sectionTitle}>ScoreBoard in action.</h2>
             <p className={styles.sectionCopy}>
-              The landing preview embeds the same UI kit component you use inside the
-              app. Tap around, adjust penalties, and feel the silky wheel input.
+              The landing preview embeds the same UI kit component you use
+              inside the app. Tap around, adjust penalties, and feel the silky
+              wheel input.
             </p>
             <div className={styles.showcaseList}>
               <span>• Start/pause rounds seamlessly</span>
               <span>• Swipeable penalty entries</span>
               <span>• Color-coded player accents</span>
             </div>
-          </div>
-          <div className={styles.scoreboardPreview}>
+          </section>
+          <div className={styles.scoreboardStandalone}>
             <ScoreBoard
               title="Thursday Night League"
               initialPlayers={SCOREBOARD_PRESET.players}
@@ -176,7 +181,7 @@ export default function LandingPage(): ReactElement {
               Every change here mirrors the in-app experience.
             </p>
           </div>
-        </section>
+        </div>
 
         <CallToActionBar
           eyebrow="Ready when you are"
@@ -184,7 +189,9 @@ export default function LandingPage(): ReactElement {
           copy="No installs, no spreadsheets—just launch the board, invite friends, and keep the momentum."
           actions={
             <>
-              <GlassButton onClick={handlePrimaryCta}>Open Score Board</GlassButton>
+              <GlassButton onClick={handlePrimaryCta}>
+                Open Score Board
+              </GlassButton>
               <button
                 type="button"
                 className={styles.textLinkButton}

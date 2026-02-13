@@ -61,8 +61,7 @@
 }
 
 .section {
-  width: 100%;
-  max-width: 1100px;
+  width: min(100%, 1100px);
   position: relative;
   z-index: 1;
 }
@@ -74,7 +73,7 @@
   box-shadow: var(--landing-shadow);
   background: rgba(255, 255, 255, 0.55);
   backdrop-filter: blur(28px) saturate(160%);
-  padding: clamp(2rem, 5vw, 3.5rem);
+  padding: clamp(1.5rem, 3vw, 2.25rem);
 }
 
 .heroSection {
@@ -103,10 +102,7 @@
 }
 
 .sectionTitle {
-  font-size: var(
-    --font-size-heading-lg,
-    clamp(1.65rem, 0.9vw + 1.3rem, 2.35rem)
-  );
+  font-size: var(--font-size-heading-lg, clamp(1.25rem, 0.65vw + 1rem, 1.9rem));
   margin: 0 0 0.75rem;
 }
 
@@ -114,26 +110,37 @@
   margin: 0;
   font-size: var(
     --font-size-body,
-    clamp(0.95rem, 0.15vw + 0.9rem, 1.05rem)
+    clamp(0.75rem, calc(0.1vw + 0.68rem), 1.05rem)
   );
   color: var(--font-color-muted, rgba(9, 13, 35, 0.75));
 }
 
 .featuresGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 1rem;
 }
 
-.showcaseSection {
-  display: grid;
-  gap: 2rem;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  align-items: center;
+.showcaseLayout {
+  width: min(100%, 1200px);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
-.showcaseCopy {
-  max-width: 420px;
+.showcaseLayout {
+  width: min(100%, 1200px);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.showcaseSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .showcaseList {
@@ -145,22 +152,41 @@
   font-weight: 600;
 }
 
-.scoreboardPreview {
-  border-radius: 32px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  background: rgba(255, 255, 255, 0.65);
-  box-shadow: 0 35px 80px rgba(15, 23, 42, 0.25);
-  padding: 1.5rem;
+.scoreboardStandalone {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border-radius: var(--landing-radius-xl);
+  border: var(--landing-border);
+  box-shadow: var(--landing-shadow);
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(28px) saturate(160%);
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+}
+
+.scoreboardStandalone :global(.scoreboard-wrapper) {
+  padding: 0;
+}
+
+.scoreboardStandalone :global(.scoreboard-card) {
+  border: none;
+  box-shadow: none;
+}
+
+@media (min-width: 1024px) {
+  .showcaseLayout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: start;
+  }
 }
 
 .previewHint {
   margin-top: 1rem;
   text-align: center;
   color: var(--font-color-muted, rgba(9, 13, 35, 0.6));
-  font-size: var(
-    --font-size-label,
-    clamp(0.78rem, 0.1vw + 0.74rem, 0.88rem)
-  );
+  font-size: var(--font-size-label, clamp(0.7rem, 0.09vw + 0.64rem, 0.85rem));
 }
 
 .textLinkButton {
@@ -175,10 +201,7 @@
 .eyebrow {
   text-transform: uppercase;
   letter-spacing: 0.2em;
-  font-size: var(
-    --font-size-eyebrow,
-    clamp(0.66rem, 0.08vw + 0.62rem, 0.76rem)
-  );
+  font-size: var(--font-size-eyebrow, clamp(0.6rem, 0.07vw + 0.56rem, 0.72rem));
   font-weight: 600;
   color: var(--font-color-muted, rgba(8, 17, 31, 0.6));
   margin-bottom: 1rem;
@@ -193,9 +216,8 @@
   .glassCard {
     padding: 2.25rem;
   }
-
-  .showcaseSection {
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  .showcaseLayout {
+    gap: 1rem;
   }
 }
 
@@ -213,16 +235,15 @@
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   }
 
-  .showcaseSection {
-    grid-template-columns: minmax(0, 1fr);
+  .scoreboardStandalone {
+    padding: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
   }
 
-  .showcaseCopy {
-    max-width: 100%;
-  }
-
-  .scoreboardPreview {
-    padding: 1.25rem;
+  .scoreboardStandalone :global(.scoreboard-wrapper) {
+    padding: 0;
   }
 
   .ctaButton {
