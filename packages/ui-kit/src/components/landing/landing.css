@@ -38,10 +38,7 @@
 .landing-hero__eyebrow {
   text-transform: uppercase;
   letter-spacing: 0.25em;
-  font-size: var(
-    --font-size-eyebrow,
-    clamp(0.66rem, 0.08vw + 0.62rem, 0.76rem)
-  );
+  font-size: var(--font-size-eyebrow, clamp(0.6rem, 0.07vw + 0.56rem, 0.72rem));
   font-weight: 600;
   color: var(--font-color-muted, rgba(8, 17, 31, 0.55));
   margin: 0;
@@ -51,7 +48,7 @@
   margin: 0;
   font-size: var(
     --font-size-landing-hero-title,
-    clamp(2.15rem, 2.2vw + 1.7rem, 3rem)
+    clamp(1.85rem, 1.2vw + 1.4rem, 2.4rem)
   );
   line-height: 1.2;
 }
@@ -60,7 +57,7 @@
   margin: 0 auto;
   font-size: var(
     --font-size-landing-hero-lede,
-    clamp(0.95rem, 0.25vw + 0.9rem, 1.2rem)
+    clamp(0.9rem, 0.16vw + 0.86rem, 1.05rem)
   );
   max-width: 720px;
   color: var(--font-color-muted, rgba(8, 17, 31, 0.75));
@@ -96,10 +93,7 @@
 
 .landing-highlight-card__label {
   display: block;
-  font-size: var(
-    --font-size-label,
-    clamp(0.78rem, 0.1vw + 0.74rem, 0.88rem)
-  );
+  font-size: var(--font-size-label, clamp(0.7rem, 0.09vw + 0.64rem, 0.85rem));
   color: var(--landing-muted-text);
 }
 
@@ -126,7 +120,7 @@
   margin: 0 0 0.5rem;
   font-size: var(
     --font-size-heading-md,
-    clamp(1.3rem, 0.6vw + 1.05rem, 2rem)
+    clamp(1.1rem, 0.45vw + 0.9rem, 1.6rem)
   );
 }
 
@@ -135,7 +129,7 @@
   color: var(--landing-muted-text);
   font-size: var(
     --font-size-body,
-    clamp(0.95rem, 0.15vw + 0.9rem, 1.05rem)
+    clamp(0.75rem, calc(0.1vw + 0.68rem), 1.05rem)
   );
 }
 
@@ -164,10 +158,7 @@
 
 .landing-cta__title {
   margin: 0;
-  font-size: var(
-    --font-size-heading-lg,
-    clamp(1.65rem, 0.9vw + 1.3rem, 2.35rem)
-  );
+  font-size: var(--font-size-heading-lg, clamp(1.25rem, 0.65vw + 1rem, 1.9rem));
 }
 
 .landing-cta__copy {
@@ -175,7 +166,7 @@
   color: rgba(255, 255, 255, 0.9);
   font-size: var(
     --font-size-body,
-    clamp(0.95rem, 0.15vw + 0.9rem, 1.05rem)
+    clamp(0.75rem, calc(0.1vw + 0.68rem), 1.05rem)
   );
 }
 
@@ -188,12 +179,15 @@
 @media (max-width: 768px) {
   .landing-hero {
     text-align: left;
-    align-items: flex-start;
   }
 
   .landing-hero__lede {
     margin: 0;
     max-width: 100%;
+  }
+  .landing-highlight-grid {
+    text-align: center;
+    justify-items: center;
   }
 
   .landing-hero__actions,
@@ -203,5 +197,15 @@
 
   .landing-cta {
     padding: 1.5rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .landing-highlight-grid {
+    justify-items: center;
+  }
+
+  .landing-highlight-card {
+    width: min(100%, 220px);
   }
 }
