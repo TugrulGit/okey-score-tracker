@@ -195,6 +195,7 @@ export function ScoreBoard({
   initialPenalties,
   onStateChange
 }: ScoreBoardProps): ReactElement {
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
   const initialCount = useMemo(() => {
     const requested = initialPlayers?.length ?? minPlayers;
     return clamp(requested, minPlayers, maxPlayers);
@@ -215,6 +216,7 @@ export function ScoreBoard({
   );
   const [roundPenalties, setRoundPenalties] = useState<RoundPenaltyMap>({});
   const [wheelContext, setWheelContext] = useState<WheelContext | null>(null);
+  const [isCompactLayout, setIsCompactLayout] = useState(false);
   // Locks scroll + listens for escape while a wheel is open.
   useEffect(() => {
     if (!wheelContext) {
@@ -234,6 +236,41 @@ export function ScoreBoard({
       window.removeEventListener('keydown', handleEsc);
     };
   }, [wheelContext]);
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    const evaluateWidth = () => {
+      const width = wrapperRef.current?.clientWidth ?? window.innerWidth ?? 0;
+      setIsCompactLayout(width <= 720);
+    };
+    evaluateWidth();
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', evaluateWidth);
+      return () => window.removeEventListener('resize', evaluateWidth);
+    }
+    if (!wrapperRef.current) {
+      return;
+    }
+    const observer = new ResizeObserver(() => evaluateWidth());
+    observer.observe(wrapperRef.current);
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+  const formatDisplayName = useCallback(
+    (name: string): string => {
+      if (!isCompactLayout) {
+        return name;
+      }
+      const trimmed = name.trim();
+      if (trimmed.length <= 3) {
+        return trimmed.toUpperCase();
+      }
+      return trimmed.slice(0, 3).toUpperCase();
+    },
+    [isCompactLayout]
+  );
   // Aggregates penalties per type and total per player for UI.
   const penaltyData = useMemo(() => {
     const perType = players.map(() => ({
@@ -327,6 +364,22 @@ export function ScoreBoard({
       )
     );
   }, []);
+  const handleCompactRename = useCallback(
+    (playerId: string) => {
+      if (typeof window === 'undefined') {
+        return;
+      }
+      const currentPlayer = players.find((player) => player.id === playerId);
+      const nextName = window.prompt(
+        'Rename player',
+        currentPlayer?.name ?? ''
+      );
+      if (nextName && nextName.trim().length > 0) {
+        handleRenamePlayer(playerId, nextName.trim());
+      }
+    },
+    [players, handleRenamePlayer]
+  );
   // --- Score mutations ---
   const updateScoreValue = useCallback(
     (roundIndex: number, playerIndex: number, nextValue: number) => {
@@ -544,7 +597,12 @@ export function ScoreBoard({
     return totals;
   }, [players, roundPenalties]);
   return (
-    <div className="scoreboard-wrapper">
+    <div
+      ref={wrapperRef}
+      className={`scoreboard-wrapper${
+        isCompactLayout ? ' scoreboard-wrapper--compact' : ''
+      }`}
+    >
       <div
         className={`scoreboard-card${wheelContext ? ' blurred' : ''}`}
         role="table"
@@ -558,10 +616,7 @@ export function ScoreBoard({
             </p>
           </div>
           <div className="scoreboard-actions">
-            <GlassButton
-              onClick={handleStartGame}
-              disabled={gameStarted}
-            >
+            <GlassButton onClick={handleStartGame} disabled={gameStarted}>
               {gameStarted ? 'Game Locked' : 'Start Game'}
             </GlassButton>
             <GlassButton tone="secondary" onClick={handleResetGame}>
@@ -626,14 +681,26 @@ export function ScoreBoard({
                 className="scoreboard-player-card"
                 style={{ border: `1px solid ${getAccent(index)}` }}
               >
-                <input
-                  aria-label={`Rename ${player.name}`}
-                  value={player.name}
-                  onChange={(event) =>
-                    handleRenamePlayer(player.id, event.target.value)
-                  }
-                  className="scoreboard-player-input"
-                />
+                {isCompactLayout ? (
+                  <button
+                    type="button"
+                    className="scoreboard-player-compact-button"
+                    onClick={() => handleCompactRename(player.id)}
+                    disabled={disablePlayerControls}
+                    aria-label={`Rename ${player.name}`}
+                  >
+                    {formatDisplayName(player.name)}
+                  </button>
+                ) : (
+                  <input
+                    aria-label={`Rename ${player.name}`}
+                    value={player.name}
+                    onChange={(event) =>
+                      handleRenamePlayer(player.id, event.target.value)
+                    }
+                    className="scoreboard-player-input"
+                  />
+                )}
               </div>
             ))}
           </div>
@@ -792,7 +859,7 @@ export function ScoreBoard({
                         borderColor: getAccent(index)
                       }}
                     >
-                      <span>{player.name}</span>
+                      <span>{formatDisplayName(player.name)}</span>
                       <strong>
                         {penaltySummary[index]?.[penalty.id] ?? 0}
                       </strong>
@@ -819,7 +886,9 @@ export function ScoreBoard({
                   className="scoreboard-total-card"
                   style={{ border: `1px solid ${getAccent(index)}` }}
                 >
-                  <div className="scoreboard-total-player">{player.name}</div>
+                  <div className="scoreboard-total-player">
+                    {formatDisplayName(player.name)}
+                  </div>
                   <div className="scoreboard-total-score">{total}</div>
                   {isLeader && (
                     <span

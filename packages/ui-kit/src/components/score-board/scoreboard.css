@@ -34,7 +34,6 @@
   );
   border-radius: var(--scoreboard-radius-lg);
   padding: 24px;
-  border: var(--scoreboard-border-light);
   box-shadow: var(--scoreboard-shadow-soft);
   backdrop-filter: saturate(140%) blur(18px);
   color: rgba(10, 10, 10, 0.95);
@@ -193,6 +192,23 @@
   font-weight: 600;
   width: 100%;
   outline: none;
+}
+
+.scoreboard-player-compact-button {
+  width: 100%;
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95em;
+  padding: 0.35rem 0.5rem;
+  border-radius: var(--scoreboard-radius-pill);
+  cursor: pointer;
+}
+
+.scoreboard-player-compact-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .scoreboard-player-error {
@@ -425,6 +441,23 @@
   font-weight: 600;
 }
 
+.scoreboard-wrapper--compact .scoreboard-penalty-summary-row {
+  flex-direction: column;
+}
+
+.scoreboard-wrapper--compact .scoreboard-penalty-info {
+  min-width: 100%;
+}
+
+.scoreboard-wrapper--compact .scoreboard-penalty-summary-values {
+  flex-direction: column;
+  width: 100%;
+}
+
+.scoreboard-wrapper--compact .scoreboard-penalty-summary-item {
+  min-width: 100%;
+}
+
 .scoreboard-round-delete {
   border-radius: 14px;
   border: var(--scoreboard-border-pill);
@@ -537,4 +570,102 @@
   text-align: center;
   color: rgba(255, 255, 255, 0.9);
   font-size: 12px;
+}
+
+@media (max-width: 900px) {
+  .scoreboard-wrapper {
+    padding: 12px;
+  }
+
+  .scoreboard-card {
+    padding: 18px;
+  }
+
+  .scoreboard-header,
+  .scoreboard-player-controls {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .scoreboard-title {
+    font-size: 1.5em;
+  }
+
+  .scoreboard-player-count-toggle {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 768px) {
+  .scoreboard-player-card {
+    padding: 10px;
+  }
+
+  .scoreboard-score-cell {
+    padding: 0.5rem;
+  }
+
+  .scoreboard-score-display {
+    font-size: 1.05em;
+  }
+
+  .scoreboard-penalty-symbols {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+
+  .scoreboard-penalty-symbol {
+    width: 100%;
+  }
+
+  .scoreboard-penalty-summary-row {
+    flex-direction: column;
+  }
+
+  .scoreboard-penalty-summary-item {
+    min-width: 100%;
+    justify-content: space-between;
+  }
+
+  .scoreboard-totals-grid {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 640px) {
+  .scoreboard-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .scoreboard-start-btn,
+  .scoreboard-reset-btn {
+    width: 100%;
+  }
+
+  .scoreboard-player-controls {
+    gap: 8px;
+  }
+
+  .scoreboard-round-row {
+    gap: 10px;
+  }
+
+  .scoreboard-penalty-symbol {
+    font-size: 0.85rem;
+    padding: 0.25rem 0;
+  }
+
+  .scoreboard-penalty-tag {
+    font-size: 0.8rem;
+  }
+
+  .scoreboard-round-delete {
+    padding: 8px 10px;
+  }
+
+  .scoreboard-total-score {
+    font-size: 20px;
+  }
 }
