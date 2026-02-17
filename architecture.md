@@ -39,6 +39,7 @@ apps/api (NestJS) has TS paths to `packages/domain`, though the current controll
 ## Applications
 
 ### Web (`apps/web`)
+
 - Next.js 14 (`apps/web/package.json`) with scripts for `dev`, `build`, and `start`. Dependencies are `next`, `react`, `react-dom`, and the UI kit via a `workspace:*` range so pnpm links directly to `packages/ui-kit` during local development.
 - `tsconfig.json` maps `ui-kit` and `domain/*` into the source folders (`packages/ui-kit/src`, `packages/domain/src`) and includes those files so the editor/tsc see live TypeScript rather than prebuilt artifacts.
 - `next.config.js`:
@@ -46,28 +47,32 @@ apps/api (NestJS) has TS paths to `packages/domain`, though the current controll
   - Sets `output: 'standalone'` for Docker image builds, `reactStrictMode: true`, and `experimental.externalDir` so files outside `apps/web` are allowed.
   - Adds a webpack alias that resolves `'ui-kit'` to `packages/ui-kit/src`, which (combined with the workspace link) enables hot reload when editing shared components.
 - Runtime wiring:
-  - `_app.tsx` loads `src/styles/global.css`, which defines CSS variables consumed by the UI kit (`apps/web/src/styles/global.css`).
+  - `_app.tsx` loads `src/styles/global.css`, which defines CSS variables for the web container. Shared UI kit tokens live within `packages/ui-kit/src/themes/global.css` so the component library can ship defaults without reaching into the app.
   - `src/pages/index.tsx` imports `Button` from `ui-kit` to prove that cross-package components render on the homepage.
   - `src/pages/score_board.tsx` imports `ScoreBoard` from `ui-kit` and passes initial players, round scores, and penalty counts. The component handles its own React state and invokes `onStateChange` whenever the board mutates.
 
 ### API (`apps/api`)
+
 - NestJS project with scripts for `start`, `start:dev` (via `nest start`), `build`, and Prisma helpers. Dependencies include `@nestjs/*`, `@prisma/client`, and `rxjs`.
 - `tsconfig.json` extends the root config but switches the module system to `NodeNext` for Nest + ES modules, emits into `dist/`, and defines `paths` to `@okey-score/domain/* → packages/domain/src/*` to make the domain layer available to services.
 - `src/app.module.ts` wires a single `GameController` that currently exposes `/` with `{ message: 'Okey Score Tracker API is up ✅' }`. No providers or Prisma modules are registered yet, but the scaffolding under `src/modules/{auth,game,user}` is where those would live.
 - The API is packaged by `infra/api.Dockerfile` (see docker-compose) and can run alongside the web app via `docker-compose up`.
 
 ### Mobile (`apps/mobile`)
+
 - Contains only `assets/` and `src/` directories with no configuration or source files checked in. Because there is no `apps/mobile/package.json`, pnpm ignores this folder even though `pnpm-workspace.yaml` matches `apps/*`. The folder is effectively a placeholder until a React Native/Expo app is added.
 
 ## Shared packages
 
 ### Domain (`packages/domain`)
+
 - Exposes type-safe building blocks for the scoring logic: entities (`Player`, `ScoreEntry`, `Scoreboard`), value objects (`PlayerId`, `Points`, `RoundNumber`), and services (`scoreboard-service.ts`).
 - `package.json` points both `main` and `types` to `src/index.ts` so consumers import the raw TS source during development. `build` emits `dist/` via `tsc --outDir dist` for production.
 - `tsconfig.json` enables strict mode, React JSX, ESNext modules, and defines a `paths` alias `domain/* → ./src/*` so internal imports stay clean.
 - Example flow (`services/scoreboard-service.ts`): `initializeScoreboard` turns simple DTOs into `Player`/`ScoreEntry` entities, `applyRoundScores` records round entries, and helpers like `getLeaderboard` or `getRounds` compute derived data. These utilities are ready to back both the API and UI when wiring occurs.
 
 ### UI Kit (`packages/ui-kit`)
+
 - Provides reusable React components and CSS theme primitives.
 - `package.json` declares `domain` as a workspace dependency, ensuring the component library can lean on shared types/value objects if needed. `build` runs `tsc --outDir dist` then `scripts/copy-static-assets.cjs` copies `.css` files (themes, component styles) into `dist/`. Even though the web app now consumes the `src/` directory directly for dev/hot reload, retaining the `dist` build keeps Docker (which copies `.next/standalone` built against `dist`) and any future external consumers working.
 - `tsconfig.json` defines `paths` so TypeScript resolves `domain/*` imports against the actual source folder.
@@ -76,7 +81,7 @@ apps/api (NestJS) has TS paths to `packages/domain`, though the current controll
 
 ## Styling & assets
 
-- Global color tokens live in `apps/web/src/styles/global.css` (and mirrored in `packages/ui-kit/src/themes/palette.css`). UI kit components rely on these CSS custom properties for gradients, penalty colors, and player accents.
+- Global color tokens live in `apps/web/src/styles/global.css`, with a mirrored set (including typography values) under `packages/ui-kit/src/themes/{global,palette}.css`. UI kit components rely on those CSS custom properties for gradients, penalty colors, and player accents.
 - The `copy-static-assets.cjs` build step guarantees CSS files next to components make it into `dist/`, so Next.js consumers can load them when importing from the built package.
 
 ## Infrastructure
