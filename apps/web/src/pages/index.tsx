@@ -10,6 +10,7 @@ import {
   CallToActionBar
 } from 'ui-kit';
 import styles from '../styles/landing.module.css';
+import { ThemeToggle } from '../components/ThemeToggle';
 
 // === Copy & Content ===
 const HIGHLIGHTS = [
@@ -94,6 +95,9 @@ export default function LandingPage(): ReactElement {
         />
       </Head>
       <main className={styles.page}>
+        <div className={styles.toolbar}>
+          <ThemeToggle />
+        </div>
         <div className={styles.auras} aria-hidden>
           <span className={`${styles.aura} ${styles.auraOne}`} />
           <span className={`${styles.aura} ${styles.auraTwo}`} />

@@ -15,6 +15,64 @@
   --scoreboard-radius-lg: 24px;
   --scoreboard-radius-md: 20px;
   --scoreboard-radius-pill: 16px;
+  --scoreboard-card-foreground: rgba(10, 10, 10, 0.95);
+  --scoreboard-card-gradient: linear-gradient(
+    160deg,
+    rgba(0, 124, 190, 0.25) 0%,
+    rgba(255, 163, 175, 0.2) 50%,
+    rgba(255, 214, 57, 0.18) 100%
+  );
+  --scoreboard-player-card-bg: rgba(255, 255, 255, 0.25);
+  --scoreboard-score-cell-bg: rgba(255, 255, 255, 0.22);
+  --scoreboard-score-display-bg: rgba(255, 255, 255, 0.25);
+  --scoreboard-penalty-symbol-bg: rgba(255, 255, 255, 0.15);
+  --scoreboard-penalty-symbol-hover-bg: rgba(255, 255, 255, 0.35);
+  --scoreboard-penalty-tag-bg: rgba(0, 0, 0, 0.25);
+  --scoreboard-penalty-summary-bg: rgba(255, 255, 255, 0.08);
+  --scoreboard-penalty-summary-item-bg: rgba(0, 0, 0, 0.15);
+  --scoreboard-penalties-bg: rgba(255, 255, 255, 0.08);
+  --scoreboard-totals-bg: rgba(255, 255, 255, 0.2);
+  --scoreboard-total-card-bg: rgba(0, 0, 0, 0.15);
+  --scoreboard-round-delete-bg: rgba(0, 0, 0, 0.15);
+  --scoreboard-add-round-bg: rgba(0, 0, 0, 0.15);
+  --scoreboard-overlay-backdrop: rgba(0, 0, 0, 0.45);
+  --scoreboard-overlay-bg: rgba(255, 255, 255, 0.1);
+  --scoreboard-compact-button-bg: rgba(255, 255, 255, 0.12);
+  --scoreboard-compact-button-color: #fff;
+}
+
+:root[data-theme='dark'] {
+  --scoreboard-card-foreground: rgba(244, 247, 255, 0.95);
+  --scoreboard-card-gradient: linear-gradient(
+    160deg,
+    rgba(4, 11, 24, 0.95) 0%,
+    rgba(9, 18, 36, 0.85) 55%,
+    rgba(27, 39, 64, 0.8) 100%
+  );
+  --scoreboard-heading-color: rgba(255, 255, 255, 0.98);
+  --scoreboard-text-color: rgba(230, 236, 255, 0.92);
+  --scoreboard-muted-text-color: rgba(182, 196, 238, 0.7);
+  --scoreboard-border-light: 1px solid rgba(255, 255, 255, 0.18);
+  --scoreboard-border-pill: 1px solid rgba(255, 255, 255, 0.2);
+  --scoreboard-shadow-soft: 0 30px 90px rgba(0, 0, 0, 0.55);
+  --scoreboard-shadow-pill: 0 14px 34px rgba(0, 0, 0, 0.5);
+  --scoreboard-player-card-bg: rgba(9, 15, 30, 0.78);
+  --scoreboard-score-cell-bg: rgba(14, 22, 41, 0.8);
+  --scoreboard-score-display-bg: rgba(24, 34, 60, 0.85);
+  --scoreboard-penalty-symbol-bg: rgba(255, 255, 255, 0.12);
+  --scoreboard-penalty-symbol-hover-bg: rgba(255, 255, 255, 0.26);
+  --scoreboard-penalty-tag-bg: rgba(255, 255, 255, 0.12);
+  --scoreboard-penalty-summary-bg: rgba(8, 14, 28, 0.8);
+  --scoreboard-penalty-summary-item-bg: rgba(12, 20, 37, 0.85);
+  --scoreboard-penalties-bg: rgba(6, 12, 26, 0.95);
+  --scoreboard-totals-bg: rgba(9, 15, 30, 0.9);
+  --scoreboard-total-card-bg: rgba(12, 19, 38, 0.95);
+  --scoreboard-round-delete-bg: rgba(255, 255, 255, 0.1);
+  --scoreboard-add-round-bg: rgba(255, 255, 255, 0.12);
+  --scoreboard-overlay-backdrop: rgba(0, 0, 0, 0.7);
+  --scoreboard-overlay-bg: rgba(5, 9, 20, 0.95);
+  --scoreboard-compact-button-bg: rgba(255, 255, 255, 0.1);
+  --scoreboard-compact-button-color: rgba(244, 247, 255, 0.92);
 }
 
 .scoreboard-wrapper {
@@ -26,17 +84,12 @@
 }
 
 .scoreboard-card {
-  background: linear-gradient(
-    160deg,
-    rgba(0, 124, 190, 0.25) 0%,
-    rgba(255, 163, 175, 0.2) 50%,
-    rgba(255, 214, 57, 0.18) 100%
-  );
+  background: var(--scoreboard-card-gradient);
   border-radius: var(--scoreboard-radius-lg);
   padding: 24px;
   box-shadow: var(--scoreboard-shadow-soft);
   backdrop-filter: saturate(140%) blur(18px);
-  color: rgba(10, 10, 10, 0.95);
+  color: var(--scoreboard-card-foreground, rgba(10, 10, 10, 0.95));
 }
 
 .scoreboard-card.blurred {
@@ -174,7 +227,7 @@
 }
 
 .scoreboard-player-card {
-  background: rgba(255, 255, 255, 0.25);
+  background: var(--scoreboard-player-card-bg, rgba(255, 255, 255, 0.25));
   border-radius: var(--scoreboard-radius-pill);
   padding: 12px;
   display: flex;
@@ -197,8 +250,11 @@
 .scoreboard-player-compact-button {
   width: 100%;
   border: none;
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
+  background: var(
+    --scoreboard-compact-button-bg,
+    rgba(255, 255, 255, 0.12)
+  );
+  color: var(--scoreboard-compact-button-color, #fff);
   font-weight: 600;
   font-size: 0.95em;
   padding: 0.35rem 0.5rem;
@@ -227,7 +283,7 @@
 .scoreboard-score-cell {
   border-radius: var(--scoreboard-radius-pill);
   border: var(--scoreboard-border-pill);
-  background: rgba(255, 255, 255, 0.22);
+  background: var(--scoreboard-score-cell-bg, rgba(255, 255, 255, 0.22));
   box-shadow: var(--scoreboard-shadow-pill);
   padding: 0.75rem 0.5rem;
   display: flex;
@@ -249,9 +305,9 @@
   padding: 0.65rem;
   border-radius: var(--scoreboard-radius-pill);
   border: var(--scoreboard-border-pill);
-  background: rgba(255, 255, 255, 0.25);
+  background: var(--scoreboard-score-display-bg, rgba(255, 255, 255, 0.25));
   box-shadow: var(--scoreboard-shadow-pill);
-  color: #fff;
+  color: var(--scoreboard-heading-color);
 }
 
 .scoreboard-penalty-symbols {
@@ -263,7 +319,7 @@
 
 .scoreboard-penalty-symbol {
   border: none;
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--scoreboard-penalty-symbol-bg, rgba(255, 255, 255, 0.15));
   border-radius: 999px;
   padding: 0.2rem 0;
   font-size: 1rem;
@@ -272,7 +328,10 @@
 }
 
 .scoreboard-penalty-symbol:hover {
-  background: rgba(255, 255, 255, 0.35);
+  background: var(
+    --scoreboard-penalty-symbol-hover-bg,
+    rgba(255, 255, 255, 0.35)
+  );
   transform: translateY(-1px);
 }
 
@@ -287,7 +346,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(0, 0, 0, 0.25);
+  background: var(--scoreboard-penalty-tag-bg, rgba(0, 0, 0, 0.25));
   border-radius: var(--scoreboard-radius-pill);
   padding: 0.15rem 0.5rem;
   font-size: 0.9rem;
@@ -345,7 +404,7 @@
 .scoreboard-wheel-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: var(--scoreboard-overlay-backdrop, rgba(0, 0, 0, 0.45));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -356,7 +415,7 @@
 
 .scoreboard-wheel-modal {
   width: min(420px, 100%);
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--scoreboard-overlay-bg, rgba(255, 255, 255, 0.1));
   border-radius: var(--scoreboard-radius-lg);
   border: var(--scoreboard-border-light);
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
@@ -417,12 +476,12 @@
   gap: 0.75rem;
   padding: 0.85rem;
   border-radius: var(--scoreboard-radius-pill);
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--scoreboard-penalty-summary-bg, rgba(255, 255, 255, 0.08));
   border: var(--scoreboard-border-light);
 }
 
 .scoreboard-penalty-summary-values {
-  color: #fff;
+  color: var(--scoreboard-heading-color);
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
@@ -430,14 +489,17 @@
 }
 
 .scoreboard-penalty-summary-item {
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  border: var(--scoreboard-border-light);
   border-radius: var(--scoreboard-radius-pill);
   padding: 0.4rem 0.8rem;
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
   min-width: 120px;
-  background: rgba(0, 0, 0, 0.15);
+  background: var(
+    --scoreboard-penalty-summary-item-bg,
+    rgba(0, 0, 0, 0.15)
+  );
   font-weight: 600;
 }
 
@@ -461,8 +523,8 @@
 .scoreboard-round-delete {
   border-radius: 14px;
   border: var(--scoreboard-border-pill);
-  background: rgba(0, 0, 0, 0.15);
-  color: #fff;
+  background: var(--scoreboard-round-delete-bg, rgba(0, 0, 0, 0.15));
+  color: var(--scoreboard-heading-color);
   padding: 10px 12px;
   cursor: pointer;
 }
@@ -476,8 +538,8 @@
   border: 1px dashed rgba(255, 255, 255, 0.5);
   border-radius: 16px;
   padding: 12px;
-  background: rgba(0, 0, 0, 0.15);
-  color: #fff;
+  background: var(--scoreboard-add-round-bg, rgba(0, 0, 0, 0.15));
+  color: var(--scoreboard-heading-color);
   font-weight: 600;
   cursor: pointer;
 }
@@ -486,8 +548,8 @@
   margin-top: 28px;
   padding: 16px;
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  background: rgba(255, 255, 255, 0.08);
+  border: var(--scoreboard-border-light);
+  background: var(--scoreboard-penalties-bg, rgba(255, 255, 255, 0.08));
 }
 
 .scoreboard-penalties-header {
@@ -524,8 +586,8 @@
   margin-top: 24px;
   padding: 16px;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: var(--scoreboard-totals-bg, rgba(255, 255, 255, 0.2));
+  border: var(--scoreboard-border-light);
 }
 
 .scoreboard-totals-grid {
@@ -537,8 +599,8 @@
 .scoreboard-total-card {
   border-radius: 16px;
   padding: 12px;
-  background: rgba(0, 0, 0, 0.15);
-  color: #fff;
+  background: var(--scoreboard-total-card-bg, rgba(0, 0, 0, 0.15));
+  color: var(--scoreboard-heading-color);
   text-align: center;
   position: relative;
 }
@@ -568,7 +630,7 @@
 .scoreboard-footer {
   margin-top: 18px;
   text-align: center;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--scoreboard-text-color);
   font-size: 12px;
 }
 

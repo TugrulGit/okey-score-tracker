@@ -15,6 +15,19 @@
   );
 }
 
+:root[data-theme='dark'] {
+  --landing-hero-text: rgba(244, 247, 255, 0.95);
+  --landing-muted-text: rgba(200, 210, 255, 0.78);
+  --landing-card-border: 1px solid rgba(255, 255, 255, 0.12);
+  --landing-card-bg: rgba(10, 14, 35, 0.65);
+  --landing-section-background: linear-gradient(
+    120deg,
+    rgba(7, 21, 41, 0.95),
+    rgba(39, 27, 62, 0.85),
+    rgba(92, 56, 42, 0.75)
+  );
+}
+
 .landing-hero {
   display: flex;
   flex-direction: column;

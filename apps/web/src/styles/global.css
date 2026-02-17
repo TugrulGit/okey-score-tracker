@@ -19,12 +19,38 @@ body {
     Arial,
     sans-serif
   );
-  background: #fdfcfb;
+  background: var(--app-background, #fdfcfb);
   color: var(--font-color-primary, rgba(8, 17, 31, 0.9));
   line-height: 1.5;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 :root {
+  color-scheme: light;
+
+  /* App backgrounds */
+  --app-background: #fdfcfb;
+  --landing-page-background: radial-gradient(
+      circle at 20% 20%,
+      rgba(255, 214, 57, 0.25),
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 80% 0%,
+      rgba(0, 124, 190, 0.25),
+      transparent 50%
+    ),
+    #f4f6fb;
+  --score-page-background: linear-gradient(
+    160deg,
+    rgba(0, 124, 190, 0.25) 0%,
+    rgba(255, 163, 175, 0.2) 50%,
+    rgba(255, 214, 57, 0.18) 100%
+  );
+  --theme-toggle-bg: rgba(255, 255, 255, 0.65);
+  --theme-toggle-border: 1px solid rgba(255, 255, 255, 0.5);
+  --theme-toggle-color: rgba(8, 17, 31, 0.85);
+
   /* CSS HEX */
   --selective-yellow: #fbaf00ff;
   --gold: #ffd639ff;
@@ -33,11 +59,11 @@ body {
   --pigment-green: #00af54ff;
 
   /* CSS HSL */
-  --selective-yellow: hsla(42, 100%, 49%, 1);
-  --gold: hsla(48, 100%, 61%, 1);
-  --salmon-pink: hsla(352, 100%, 82%, 1);
-  --honolulu-blue: hsla(201, 100%, 37%, 1);
-  --pigment-green: hsla(149, 100%, 34%, 1);
+  --selective-yellow-hsl: hsla(42, 100%, 49%, 1);
+  --gold-hsl: hsla(48, 100%, 61%, 1);
+  --salmon-pink-hsl: hsla(352, 100%, 82%, 1);
+  --honolulu-blue-hsl: hsla(201, 100%, 37%, 1);
+  --pigment-green-hsl: hsla(149, 100%, 34%, 1);
 
   /* Landing page layout tokens */
   --landing-radius-xl: 36px;
@@ -46,6 +72,13 @@ body {
   --landing-shadow: 0 35px 80px rgba(15, 23, 42, 0.25);
   --landing-border-color: rgba(255, 255, 255, 0.5);
   --landing-shadow-color: rgba(15, 23, 42, 0.25);
+  --landing-card-bg: rgba(255, 255, 255, 0.55);
+  --landing-section-background: linear-gradient(
+    120deg,
+    rgba(0, 124, 190, 0.7),
+    rgba(255, 163, 175, 0.6),
+    rgba(255, 214, 57, 0.6)
+  );
 
   /* Typography (rem + clamp for responsiveness) */
   --font-family-base: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto,
@@ -64,4 +97,46 @@ body {
   --font-color-muted: rgba(8, 17, 31, 0.62);
   --font-color-inverse: rgba(255, 255, 255, 0.95);
   --font-color-inverse-muted: rgba(255, 255, 255, 0.78);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --app-background: #030713;
+  --landing-page-background: radial-gradient(
+      circle at 12% 12%,
+      rgba(0, 124, 190, 0.3),
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 88% 8%,
+      rgba(255, 163, 175, 0.18),
+      transparent 50%
+    ),
+    #050b19;
+  --score-page-background: linear-gradient(
+    160deg,
+    rgba(4, 11, 24, 0.95) 0%,
+    rgba(11, 22, 44, 0.85) 55%,
+    rgba(32, 52, 82, 0.8) 100%
+  );
+  --theme-toggle-bg: rgba(11, 18, 35, 0.75);
+  --theme-toggle-border: 1px solid rgba(255, 255, 255, 0.15);
+  --theme-toggle-color: rgba(244, 247, 255, 0.92);
+
+  --landing-border: 1px solid rgba(255, 255, 255, 0.15);
+  --landing-shadow: 0 45px 90px rgba(0, 0, 0, 0.65);
+  --landing-border-color: rgba(255, 255, 255, 0.15);
+  --landing-shadow-color: rgba(0, 0, 0, 0.65);
+  --landing-card-bg: rgba(9, 13, 32, 0.7);
+  --landing-section-background: linear-gradient(
+    120deg,
+    rgba(7, 21, 41, 0.95),
+    rgba(39, 27, 62, 0.85),
+    rgba(92, 56, 42, 0.75)
+  );
+
+  --font-color-primary: rgba(244, 247, 255, 0.95);
+  --font-color-muted: rgba(200, 210, 255, 0.72);
+  --font-color-inverse: rgba(8, 17, 31, 0.92);
+  --font-color-inverse-muted: rgba(8, 17, 31, 0.65);
 }

@@ -1,0 +1,37 @@
+.toggle {
+  border: var(
+    --theme-toggle-border,
+    1px solid rgba(255, 255, 255, 0.35)
+  );
+  border-radius: 999px;
+  padding: 0.35rem 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: var(--theme-toggle-bg, rgba(255, 255, 255, 0.2));
+  color: var(--theme-toggle-color, rgba(8, 17, 31, 0.85));
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  backdrop-filter: saturate(140%) blur(18px);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.toggle:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+}
+
+.toggle:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+}
+
+.icon {
+  font-size: 1.05rem;
+}
+
+.text {
+  font-size: 0.85rem;
+}
