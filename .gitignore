@@ -40,3 +40,10 @@ typings/
 .pnpm-store/
 .pnpm-debug.log
 .pnpm-lock.yaml
+
+# Agents
+agent-dev.md
+agent-docstring.md
+agent-modular.md
+design-style.md
+architecture.md
