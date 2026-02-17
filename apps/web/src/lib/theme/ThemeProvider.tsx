@@ -8,6 +8,8 @@ import {
   useState
 } from 'react';
 
+// === Theme context contract ===
+
 export type ThemeMode = 'light' | 'dark';
 
 type ThemeSource = 'system' | 'user';
@@ -27,9 +29,19 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 const prefersDarkQuery = '(prefers-color-scheme: dark)';
 
+// === Theme detection & persistence helpers ===
+
+/**
+ * Narrows persisted strings to supported theme modes so we ignore corrupt storage values.
+ * Internal helper; only used while reading and validating localStorage.
+ */
 const isThemeMode = (value: string | null): value is ThemeMode =>
   value === 'light' || value === 'dark';
 
+/**
+ * Reads the OS-level preference (light/dark) via matchMedia.
+ * Falls back to `light` on the server so SSR markup is deterministic.
+ */
 const getSystemTheme = (): ThemeMode => {
   if (typeof window === 'undefined') {
     return 'light';
@@ -37,6 +49,10 @@ const getSystemTheme = (): ThemeMode => {
   return window.matchMedia(prefersDarkQuery).matches ? 'dark' : 'light';
 };
 
+/**
+ * Pulls a previously selected theme from localStorage when available.
+ * Returns null whenever storage is unavailable, unreadable, or contains unsupported values.
+ */
 const getStoredTheme = (): ThemeMode | null => {
   if (typeof window === 'undefined') {
     return null;
@@ -50,10 +66,17 @@ const getStoredTheme = (): ThemeMode | null => {
   }
 };
 
+/**
+ * Wraps the React tree with a theme context that syncs the OS preference,
+ * persisted overrides, and document-level attributes (data-theme + color-scheme).
+ * Consumed across the web app via `useTheme` to drive Tailwind/theme tokens and toggle controls.
+ */
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<ThemeMode>('light');
   const [systemTheme, setSystemTheme] = useState<ThemeMode>('light');
   const [source, setSource] = useState<ThemeSource>('system');
+
+  // === Provider lifecycle synchronization ===
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -143,6 +166,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
+/**
+ * Convenience hook for consuming the theme context; throws when called outside the provider
+ * so feature modules fail fast instead of silently rendering with stale defaults.
+ */
 export function useTheme(): ThemeContextValue {
   const context = useContext(ThemeContext);
   if (!context) {
