@@ -54,8 +54,12 @@ apps/api (NestJS) has TS paths to `packages/domain`, though the current controll
 ### API (`apps/api`)
 
 - NestJS project with scripts for `start`, `start:dev` (via `nest start`), `build`, and Prisma helpers. Dependencies include `@nestjs/*`, `@prisma/client`, and `rxjs`.
-- `tsconfig.json` extends the root config but switches the module system to `NodeNext` for Nest + ES modules, emits into `dist/`, and defines `paths` to `@okey-score/domain/* → packages/domain/src/*` to make the domain layer available to services.
-- `src/app.module.ts` wires a single `GameController` that currently exposes `/` with `{ message: 'Okey Score Tracker API is up ✅' }`. No providers or Prisma modules are registered yet, but the scaffolding under `src/modules/{auth,game,user}` is where those would live.
+- `tsconfig.json` extends the root config but switches the module system to `NodeNext` for Nest + ES modules, emits into `dist/`, and defines `paths` to `@okey-score/domain/* → packages/domain/src/*` to make the domain layer available to services. `emitDecoratorMetadata` is enabled because Nest DI depends on emitted constructor metadata (without it, controllers/services can be created with `undefined` dependencies at runtime).
+- `src/app.module.ts` now imports a global `PrismaModule` plus `GameModule`. `src/main.ts` enables CORS for local web development and uses Nest's `app.enableShutdownHooks()` for graceful shutdown.
+- `src/modules/prisma/prisma.service.ts` wraps `PrismaClient`, connects/disconnects on module lifecycle hooks, and centralizes DB logging/connection management for feature modules.
+- Prisma CLI scripts in `apps/api/package.json` use `dotenv -e ../../.env -- ...` so commands run from `apps/api` still load the repo-root `.env` (`prisma:generate`, `prisma:migrate`). `start:dev` also loads the root `.env` for the same reason; otherwise Prisma fails during Nest bootstrap with `P1012` (`DATABASE_URL` missing).
+- `apps/api/prisma/schema.prisma` uses `env("DATABASE_URL")` for the PostgreSQL datasource and currently contains a placeholder `Game` model while the full schema is still in progress.
+- Prisma 5 note: do not use `prisma.$on('beforeExit', ...)` for shutdown handling with the default library engine. That hook throws at runtime in Prisma 5; use Nest shutdown hooks + Prisma `onModuleDestroy()` instead.
 - The API is packaged by `infra/api.Dockerfile` (see docker-compose) and can run alongside the web app via `docker-compose up`.
 
 ### Mobile (`apps/mobile`)
@@ -87,6 +91,9 @@ apps/api (NestJS) has TS paths to `packages/domain`, though the current controll
 ## Infrastructure
 
 - `infra/docker-compose.yml` builds two images from `infra/web.Dockerfile` and `infra/api.Dockerfile` and runs them together (`web` depends on `api`).
+- `infra/docker-compose.dev.yml` provides a dev-only Postgres 15 container for local hot-reload workflows. It maps container port `5432` to host port `5433` (`5433:5432`) to avoid collisions with locally installed Postgres instances (for example Homebrew/Postgres used by pgAdmin on `localhost:5432`).
+- Root `.env` / `.env.example` default `DATABASE_URL` to `postgresql://postgres:postgres@localhost:5433/okey?schema=public` for the local Docker-backed dev database, while the production compose stack still uses the internal service hostname `postgres:5432`.
+- Local troubleshooting note: a running host Postgres service on `localhost:5432` can produce misleading Prisma permission/auth errors (for example `P1010`) when the app is expected to talk to Docker Postgres. Confirm the host port and credentials match the intended Postgres instance before debugging grants/roles.
 - `infra/k8s`, `infra/terraform`, and `infra/scripts` are placeholders for future deployment automation.
 
 ## Testing status
