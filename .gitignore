@@ -30,6 +30,7 @@ node_modules/
 *.njsproj
 *.sln
 *.sw?
+.env
 
 # Dependency directories
 jspm_packages/
