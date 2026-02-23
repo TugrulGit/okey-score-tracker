@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/* 👇 extend with your models later */
+// Extend with core models (User, Game, etc.) as tasks progress.
 model Game {
   id        String  @id @default(uuid())
   createdAt DateTime @default(now())

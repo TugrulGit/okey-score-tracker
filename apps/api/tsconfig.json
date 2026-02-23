@@ -12,6 +12,7 @@
       "@okey-score/domain/*": ["../../packages/domain/src/*"]
     },
     "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "preserveWatchOutput": true
   },
   "include": ["src/**/*"],
