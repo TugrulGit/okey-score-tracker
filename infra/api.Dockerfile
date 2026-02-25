@@ -20,14 +20,15 @@ COPY packages/domain/package.json                                              .
 #    - "-node-linker=hoisted" ensures all dependencies are hoisted to the root node_modules
 #      (this is necessary for ESM compatibility in NestJS)
 RUN corepack enable \
-&& pnpm install --frozen-lockfile --prod -node-linker=hoisted
+&& pnpm install --frozen-lockfile -node-linker=hoisted
 
 
 # 2. Copy full source and build the NestJS API
 COPY . .
-#    - "pnpm --filter api" targets the package whose "name" is simply "api"
-RUN pnpm --filter api run build
-#  && pnpm --filter api run prisma:generate
+#    - Generate Prisma client then build the API so dist/ bundles include up-to-date types
+RUN pnpm --filter api run prisma:generate \
+ && pnpm --filter api run build \
+ && pnpm prune --prod
 
 ############################
 # 2  Runtime stage        #
@@ -44,5 +45,4 @@ COPY --from=builder /repo/apps/api/. /app/api/
 # COPY --from=builder /repo/apps/api/package.json ./package.json
 
 EXPOSE 4000
-# ENTRYPOINT [ "sh", "-c", "trap : TERM INT; sleep infinity & wait" ]
-CMD ["node", "./api/dist/main.js"]
+CMD ["sh", "-c", "cd /app/api && ./node_modules/.bin/prisma migrate deploy && node dist/main.js"]
