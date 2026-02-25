@@ -7,8 +7,156 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Extend with core models (User, Game, etc.) as tasks progress.
+/// Overall lifecycle for a given game.
+enum GameStatus {
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+}
+
+/// Penalty types mirror the UI kit's scoreboard metadata.
+enum PenaltyType {
+  MISPLAY
+  OKEY_TO_OPPONENT
+  USEFUL_TILE
+  FINISHER
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  displayName  String
+  avatarUrl    String?
+  timezone     String    @default("UTC")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  lastLoginAt  DateTime?
+
+  sessions     Session[]
+  resetTokens  PasswordResetToken[]
+  ownedGames   Game[]    @relation("OwnerGames")
+  playerSlots  GamePlayer[]
+}
+
+model Session {
+  id               String   @id @default(uuid())
+  userId           String
+  refreshTokenHash String
+  ip               String?
+  userAgent        String?
+  expiresAt        DateTime
+  createdAt        DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model PasswordResetToken {
+  id         String   @id @default(uuid())
+  userId     String
+  tokenHash  String   @unique
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt], map: "password_reset_token_expires_at_idx")
+}
+
 model Game {
-  id        String  @id @default(uuid())
+  id          String      @id @default(uuid())
+  ownerId     String
+  title       String      @default("Untitled Game")
+  status      GameStatus  @default(ACTIVE)
+  startedAt   DateTime    @default(now())
+  completedAt DateTime?
+  notes       String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  owner     User          @relation("OwnerGames", fields: [ownerId], references: [id], onDelete: Cascade)
+  players   GamePlayer[]
+  rounds    Round[]
+  penalties Penalty[]
+  snapshot  GameSnapshot?
+
+  @@index([ownerId, status])
+  @@index([status, completedAt])
+}
+
+model GamePlayer {
+  id          String    @id @default(uuid())
+  gameId      String
+  userId      String?
+  displayName String
+  seatIndex   Int
+  avatarColor String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  game  Game  @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  user  User? @relation(fields: [userId], references: [id])
+  scores RoundScore[]
+  penalties Penalty[]
+
+  @@unique([gameId, seatIndex])
+  @@index([userId])
+}
+
+model Round {
+  id        String   @id @default(uuid())
+  gameId    String
+  index     Int
+  startedAt DateTime @default(now())
   createdAt DateTime @default(now())
+
+  game      Game         @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  scores    RoundScore[]
+  penalties Penalty[]    @relation("RoundPenalties")
+
+  @@unique([gameId, index])
+}
+
+model RoundScore {
+  id       String @id @default(uuid())
+  roundId  String
+  playerId String
+  points   Int
+  createdAt DateTime @default(now())
+
+  round  Round      @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  player GamePlayer @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([roundId, playerId])
+}
+
+model Penalty {
+  id        String      @id @default(uuid())
+  gameId    String
+  roundId   String?
+  playerId  String
+  type      PenaltyType
+  value     Int        @default(0)
+  createdAt DateTime   @default(now())
+
+  game   Game       @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  round  Round?     @relation("RoundPenalties", fields: [roundId], references: [id], onDelete: SetNull)
+  player GamePlayer @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@index([gameId, type])
+  @@index([playerId])
+}
+
+model GameSnapshot {
+  id         String   @id @default(uuid())
+  gameId     String   @unique
+  payload    Json
+  summary    Json?
+  computedAt DateTime @default(now())
+
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
 }
