@@ -24,12 +24,12 @@ export class TokenService {
   readonly accessTtlSeconds = this.resolveInt(process.env.JWT_ACCESS_TTL, 15 * 60);
   readonly refreshTtlSeconds = this.resolveInt(process.env.JWT_REFRESH_TTL, 7 * 24 * 60 * 60);
 
-  async generateAccessToken(user: TokenUserPayload): Promise<string> {
+  generateAccessToken(user: TokenUserPayload): string {
     const payload: Omit<AccessTokenPayload, 'iat' | 'exp'> = { sub: user.id, email: user.email };
     return this.sign(payload, this.accessSecret, this.accessTtlSeconds);
   }
 
-  async generateRefreshToken(user: TokenUserPayload, sessionId: string): Promise<string> {
+  generateRefreshToken(user: TokenUserPayload, sessionId: string): string {
     const payload = { sub: user.id, email: user.email, sessionId };
     return this.sign(payload, this.refreshSecret, this.refreshTtlSeconds);
   }

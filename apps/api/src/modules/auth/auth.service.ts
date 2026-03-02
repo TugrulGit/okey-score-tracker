@@ -141,7 +141,7 @@ export class AuthService {
       }
     });
 
-    await this.emailService.sendPasswordReset(user.email, token);
+    this.emailService.sendPasswordReset(user.email, token);
   }
 
   async resetPassword(dto: ResetPasswordDto): Promise<void> {
@@ -175,7 +175,7 @@ export class AuthService {
     context: RequestContext
   ): Promise<AuthResult> {
     const sessionId = this.tokenService.generateSessionId();
-    const refreshToken = await this.tokenService.generateRefreshToken({ id: userId, email }, sessionId);
+    const refreshToken = this.tokenService.generateRefreshToken({ id: userId, email }, sessionId);
     await this.prisma.session.create({
       data: {
         id: sessionId,
@@ -187,7 +187,7 @@ export class AuthService {
       }
     });
 
-    const accessToken = await this.tokenService.generateAccessToken({ id: userId, email });
+    const accessToken = this.tokenService.generateAccessToken({ id: userId, email });
 
     return {
       user: {

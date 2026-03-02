@@ -19,4 +19,4 @@ async function bootstrap() {
   await app.listen(4000);
   console.log(`🚀 API ready at http://localhost:4000`);
 }
-bootstrap();
+void bootstrap();

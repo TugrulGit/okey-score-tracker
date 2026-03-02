@@ -23,6 +23,7 @@ import { RateLimitGuard } from './rate-limit.guard.js';
     RefreshTokenGuard,
     JwtAuthGuard,
     RateLimitGuard
-  ]
+  ],
+  exports: [PasswordService, TokenService, JwtAuthGuard, RefreshTokenGuard]
 })
 export class AuthModule {}

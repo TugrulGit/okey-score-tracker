@@ -7,7 +7,7 @@ import { Injectable, Logger } from '@nestjs/common';
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
 
-  async sendPasswordReset(email: string, token: string): Promise<void> {
+  sendPasswordReset(email: string, token: string): void {
     const webBase = process.env.WEB_BASE_URL ?? 'http://localhost:3000';
     const link = `${webBase}/reset-password?token=${token}`;
     this.logger.log(`Password reset link for ${email}: ${link}`);

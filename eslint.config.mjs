@@ -3,6 +3,7 @@ import { FlatCompat } from '@eslint/eslintrc';
 import js from '@eslint/js';
 import tsParser from '@typescript-eslint/parser';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
+import { fileURLToPath } from 'node:url';
 
 // Needed because Next's provided configs are still "eslintrc" style
 const compat = new FlatCompat({
@@ -10,6 +11,8 @@ const compat = new FlatCompat({
   baseDirectory: import.meta.dirname,
   recommendedConfig: js.configs.recommended
 });
+
+const workspaceTsconfig = fileURLToPath(new URL('./tsconfig.base.json', import.meta.url));
 
 export default [
   // Next.js + Core Web Vitals + TS rules, limited to the Next app
@@ -40,7 +43,7 @@ export default [
     languageOptions: {
       parser: tsParser,
       parserOptions: {
-        project: ['./tsconfig.base.json']
+        project: [workspaceTsconfig]
       }
     },
     // You can add extra rules/plugins here if desired
