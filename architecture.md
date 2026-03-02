@@ -5,7 +5,7 @@ This monorepo (`okey-score-monorepo`) hosts every client, backend, and shared li
 ## Repository layout
 
 - `apps/web` – Next.js front-end that consumes the shared UI kit.
-- `apps/api` – NestJS HTTP API (currently only exposes a liveness route) prepared to consume the domain logic.
+- `apps/api` – NestJS HTTP API powering auth, user profile, and game/history endpoints while consuming the domain logic.
 - `apps/mobile` – placeholder React Native/Expo workspace (folders exist but there is no package.json yet, so it is not part of the pnpm workspace build graph).
 - `packages/ui-kit` – React component library (buttons, the score board widget, theme tokens).
 - `packages/domain` – pure TypeScript domain model: players, scoreboards, services, and value objects.
@@ -55,10 +55,15 @@ apps/api (NestJS) has TS paths to `packages/domain`, though the current controll
 
 - NestJS project with scripts for `start`, `start:dev` (via `nest start`), `build`, and Prisma helpers. Dependencies include `@nestjs/*`, `@prisma/client`, and `rxjs`.
 - `tsconfig.json` extends the root config but switches the module system to `NodeNext` for Nest + ES modules, emits into `dist/`, and defines `paths` to `@okey-score/domain/* → packages/domain/src/*` to make the domain layer available to services. `emitDecoratorMetadata` is enabled because Nest DI depends on emitted constructor metadata (without it, controllers/services can be created with `undefined` dependencies at runtime).
-- `src/app.module.ts` now imports a global `PrismaModule` plus `GameModule`. `src/main.ts` enables CORS for local web development and uses Nest's `app.enableShutdownHooks()` for graceful shutdown.
+- `src/app.module.ts` wires `PrismaModule`, `AuthModule`, `UserModule`, and the production `GamesModule` alongside the legacy `GameModule` health controller. `src/main.ts` enables CORS for local web development, applies a global `ValidationPipe`, registers the `HttpExceptionFilter` for `{ message, code }` responses, and uses Nest's `app.enableShutdownHooks()` for graceful shutdown.
+- Feature modules:
+  - `src/modules/auth` implements register/login/logout/refresh plus forgot/reset password flows, console-based email stubs, bcrypt-strength hashing (`PasswordService`), and in-memory rate limiting guards.
+  - `src/modules/user` exposes `/users/me` profile reads/updates, password changes, and refresh-session revocation guarded by the custom JWT guard + `CurrentUser` decorator.
+  - `src/modules/games` covers: create/active game endpoints, round + penalty appends, player rename/reorder, completion, `GET /games/:id`, and `/games/history` with cursor pagination + status/participant filters backed by scoreboard snapshots.
+  - `src/modules/game` remains as a simple root controller returning API + DB health metadata for smoke tests.
 - `src/modules/prisma/prisma.service.ts` wraps `PrismaClient`, connects/disconnects on module lifecycle hooks, and centralizes DB logging/connection management for feature modules.
 - Prisma CLI scripts in `apps/api/package.json` use `dotenv -e ../../.env -- ...` so commands run from `apps/api` still load the repo-root `.env` (`prisma:generate`, `prisma:migrate`). `start:dev` also loads the root `.env` for the same reason; otherwise Prisma fails during Nest bootstrap with `P1012` (`DATABASE_URL` missing).
-- `apps/api/prisma/schema.prisma` uses `env("DATABASE_URL")` for the PostgreSQL datasource and currently contains a placeholder `Game` model while the full schema is still in progress.
+- `apps/api/prisma/schema.prisma` now contains the expanded domain models (`User`, `Session`, `PasswordResetToken`, `Game`, `GamePlayer`, `Round`, `RoundScore`, `Penalty`, `GameSnapshot`) plus enums (`GameStatus`, `PenaltyType`) and indexes/uniques aligning with the backend features.
 - Prisma 5 note: do not use `prisma.$on('beforeExit', ...)` for shutdown handling with the default library engine. That hook throws at runtime in Prisma 5; use Nest shutdown hooks + Prisma `onModuleDestroy()` instead.
 - The API is packaged by `infra/api.Dockerfile` (see docker-compose) and can run alongside the web app via `docker-compose up`.
 
