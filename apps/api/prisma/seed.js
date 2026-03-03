@@ -3,13 +3,6 @@ import { PrismaClient, GameStatus, PenaltyType } from '@prisma/client';
 const prisma = new PrismaClient();
 
 const DEMO_EMAIL = 'demo@okeyscore.local';
-const PENALTY_UI_KEY = {
-  [PenaltyType.MISPLAY]: 'misplay',
-  [PenaltyType.OKEY_TO_OPPONENT]: 'okeyToOpponent',
-  [PenaltyType.USEFUL_TILE]: 'usefulTile',
-  [PenaltyType.FINISHER]: 'finisher'
-};
-
 const playerSeeds = [
   { name: 'Hasan', color: '#007cbe' },
   { name: 'Kerem', color: '#ffd639' },
@@ -91,10 +84,10 @@ async function seed() {
 
   const penaltyState = game.players.reduce((acc, player) => {
     acc[player.id] = {
-      misplay: 0,
-      okeyToOpponent: 0,
-      usefulTile: 0,
-      finisher: 0
+      MISPLAY: 0,
+      OKEY_TO_OPPONENT: 0,
+      USEFUL_TILE: 0,
+      FINISHER: 0
     };
     return acc;
   }, {});
@@ -112,8 +105,7 @@ async function seed() {
       }
     });
 
-    const uiKey = PENALTY_UI_KEY[penalty.type];
-    penaltyState[targetPlayer.id][uiKey] += penalty.value;
+    penaltyState[targetPlayer.id][penalty.type] += penalty.value;
   }
 
   const totals = game.players.map((player, seatIndex) => {

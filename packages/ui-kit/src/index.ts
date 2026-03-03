@@ -3,6 +3,7 @@ export {
   ScoreBoard,
   type ScoreBoardProps,
   type ScoreBoardSnapshot,
+  type RoundSubmitPayload,
 } from "./components/score-board/scoreboard";
 export { GlassButton } from "./components/buttons/GlassButton";
 export { HeroPanel } from "./components/landing/HeroPanel";

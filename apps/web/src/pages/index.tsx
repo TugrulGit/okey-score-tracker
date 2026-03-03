@@ -53,10 +53,10 @@ const SCOREBOARD_PRESET = {
     { scores: [220, -180, 60, -100] }
   ],
   penalties: [
-    { misplay: 1, okeyToOpponent: 0, usefulTile: 0, finisher: 0 },
-    { misplay: 0, okeyToOpponent: 1, usefulTile: 0, finisher: 0 },
-    { misplay: 0, okeyToOpponent: 0, usefulTile: 2, finisher: 0 },
-    { misplay: 0, okeyToOpponent: 0, usefulTile: 0, finisher: 1 }
+    { MISPLAY: 1, OKEY_TO_OPPONENT: 0, USEFUL_TILE: 0, FINISHER: 0 },
+    { MISPLAY: 0, OKEY_TO_OPPONENT: 1, USEFUL_TILE: 0, FINISHER: 0 },
+    { MISPLAY: 0, OKEY_TO_OPPONENT: 0, USEFUL_TILE: 2, FINISHER: 0 },
+    { MISPLAY: 0, OKEY_TO_OPPONENT: 0, USEFUL_TILE: 0, FINISHER: 1 }
   ]
 } as const;
 

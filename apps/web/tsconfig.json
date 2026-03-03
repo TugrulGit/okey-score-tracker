@@ -6,6 +6,7 @@
     "paths": {
       "ui-kit": ["../../packages/ui-kit/src"],
       "ui-kit/*": ["../../packages/ui-kit/src/*"],
+      "domain": ["../../packages/domain/src/index.ts"],
       "domain/*": ["../../packages/domain/src/*"]
     },
     "lib": ["dom", "dom.iterable", "esnext"],

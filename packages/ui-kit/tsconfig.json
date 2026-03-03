@@ -3,6 +3,7 @@
     "jsx": "react-jsx",
     "lib": ["dom", "esnext"],
     "paths": {
+      "domain": ["../../packages/domain/src/index.ts"],
       "domain/*": ["../../packages/domain/src/*"]
     }
   }

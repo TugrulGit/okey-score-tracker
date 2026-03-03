@@ -13,6 +13,11 @@ import {
 import '../../themes/palette.css';
 import './scoreboard.css';
 import { GlassButton } from '../buttons/GlassButton';
+import {
+  type PenaltyKind,
+  PENALTY_KINDS,
+  type ScoreboardSnapshot
+} from 'domain/snapshots/scoreboard-snapshot';
 // Palette accents per player slot; used for player cards and summary chips.
 const PLAYER_ACCENTS = [
   'var(--color-honolulu-blue, #007cbeff)',
@@ -23,28 +28,28 @@ const PLAYER_ACCENTS = [
 // Metadata for penalty types shown in cells & summary.
 const PENALTY_TYPES = [
   {
-    id: 'misplay',
+    id: 'MISPLAY',
     label: 'Misplay',
     description: 'Wrong tile or illegal move',
     icon: '⚠️',
     color: 'var(--color-selective-yellow, #fbaf00ff)'
   },
   {
-    id: 'okeyToOpponent',
+    id: 'OKEY_TO_OPPONENT',
     label: 'Okey to Opponent',
     description: 'Discarded a tile that helped the opponent',
     icon: '🂱',
     color: 'var(--color-salmon-pink, #ffa3afff)'
   },
   {
-    id: 'usefulTile',
+    id: 'USEFUL_TILE',
     label: 'Useful Tile',
     description: 'Failed to give up a helpful tile',
     icon: '🧩',
     color: 'var(--color-honolulu-blue, #007cbeff)'
   },
   {
-    id: 'finisher',
+    id: 'FINISHER',
     label: 'Finisher',
     description: 'Opponent closed their hand',
     icon: '🏁',
@@ -53,40 +58,44 @@ const PENALTY_TYPES = [
 ] as const;
 const SCORE_MIN = -800;
 const SCORE_MAX = 800;
-type PenaltyId = (typeof PENALTY_TYPES)[number]['id'];
 interface Player {
   id: string;
-  name: string;
+  displayName: string;
 }
 interface Round {
   id: string;
   scores: number[];
 }
-type PenaltyState = Record<string, Record<PenaltyId, number>>;
+type PenaltyState = Record<string, Record<PenaltyKind, number>>;
 
 // Per-round penalty entries so each cell shows its penalties inline.
 interface PenaltyEntry {
   id: string;
-  type: PenaltyId;
+  type: PenaltyKind;
   value: number;
 }
 type RoundPenaltyMap = Record<string, Record<number, PenaltyEntry[]>>;
 
-export interface ScoreBoardSnapshot {
-  players: Player[];
-  rounds: Round[];
-  penalties: PenaltyState;
-  totals: number[];
-  started: boolean;
-}
+export type ScoreBoardSnapshot = ScoreboardSnapshot;
 export interface ScoreBoardProps {
   title?: string;
   minPlayers?: number;
   maxPlayers?: number;
   initialPlayers?: ReadonlyArray<string>;
   initialRounds?: ReadonlyArray<{ scores: ReadonlyArray<number> }>;
-  initialPenalties?: ReadonlyArray<Partial<Record<PenaltyId, number>>>;
+  initialPenalties?: ReadonlyArray<Partial<Record<PenaltyKind, number>>>;
+  interactionMode?: 'editable' | 'readonly';
   onStateChange?: (snapshot: ScoreBoardSnapshot) => void;
+  onRoundSubmit?: (payload: RoundSubmitPayload) => void;
+  onPlayerChange?: (players: Player[], snapshot: ScoreBoardSnapshot) => void;
+}
+
+export interface RoundSubmitPayload {
+  roundId: string;
+  roundNumber: number;
+  scores: { playerId: string; points: number }[];
+  penalties: { playerId: string; type: PenaltyKind; value: number }[];
+  snapshot: ScoreboardSnapshot;
 }
 // === Utility helpers ===
 const clamp = (value: number, min: number, max: number) =>
@@ -109,7 +118,7 @@ type WheelContext =
       kind: 'penalty';
       roundIndex: number;
       playerIndex: number;
-      penaltyType: PenaltyId;
+      penaltyType: PenaltyKind;
       initialValue: number;
     };
 // --- Seed builders ---
@@ -119,7 +128,7 @@ const buildPlayerSeed = (
 ): Player[] =>
   Array.from({ length: targetCount }, (_, index) => ({
     id: `player-${index + 1}-${makeId()}`,
-    name: providedNames?.[index] ?? `Player ${index + 1}`
+    displayName: providedNames?.[index] ?? `Player ${index + 1}`
   }));
 const adjustScores = (
   scores: ReadonlyArray<number>,
@@ -151,16 +160,16 @@ const buildInitialRounds = (
 };
 const buildInitialPenalties = (
   players: Player[],
-  initialPenalties?: ReadonlyArray<Partial<Record<PenaltyId, number>>>
+  initialPenalties?: ReadonlyArray<Partial<Record<PenaltyKind, number>>>
 ): PenaltyState => {
   return players.reduce<PenaltyState>((acc, player, index) => {
-    acc[player.id] = PENALTY_TYPES.reduce<Record<PenaltyId, number>>(
+    acc[player.id] = PENALTY_KINDS.reduce<Record<PenaltyKind, number>>(
       (memo, penalty) => {
-        const count = initialPenalties?.[index]?.[penalty.id] ?? 0;
-        memo[penalty.id] = Math.max(0, count);
+        const count = initialPenalties?.[index]?.[penalty] ?? 0;
+        memo[penalty] = Math.max(0, count);
         return memo;
       },
-      {} as Record<PenaltyId, number>
+      {} as Record<PenaltyKind, number>
     );
     return acc;
   }, {});
@@ -171,12 +180,12 @@ const syncPenaltyState = (
 ): PenaltyState =>
   players.reduce<PenaltyState>((acc, player) => {
     const existing = current[player.id] ?? {};
-    acc[player.id] = PENALTY_TYPES.reduce<Record<PenaltyId, number>>(
+    acc[player.id] = PENALTY_KINDS.reduce<Record<PenaltyKind, number>>(
       (memo, penalty) => {
-        memo[penalty.id] = existing[penalty.id] ?? 0;
+        memo[penalty] = existing[penalty] ?? 0;
         return memo;
       },
-      {} as Record<PenaltyId, number>
+      {} as Record<PenaltyKind, number>
     );
     return acc;
   }, {});
@@ -184,6 +193,91 @@ const getAccent = (index: number) =>
   PLAYER_ACCENTS[index] ??
   PLAYER_ACCENTS[PLAYER_ACCENTS.length - 1] ??
   '#007cbeff';
+
+const ensurePenaltyLedger = (players: Player[], ledger: PenaltyState): PenaltyState => {
+  return players.reduce<PenaltyState>((acc, player) => {
+    const current = ledger[player.id] ?? {};
+    acc[player.id] = PENALTY_KINDS.reduce<Record<PenaltyKind, number>>((memo, kind) => {
+      memo[kind] = current[kind] ?? 0;
+      return memo;
+    }, {} as Record<PenaltyKind, number>);
+    return acc;
+  }, {});
+};
+
+const createSnapshot = (
+  players: Player[],
+  rounds: Round[],
+  penalties: PenaltyState,
+  started: boolean
+): ScoreboardSnapshot => {
+  const ledger = ensurePenaltyLedger(players, penalties);
+  const totals = players.reduce<Record<string, number>>((acc, player, playerIndex) => {
+    const scoreSum = rounds.reduce((sum, round) => sum + (round.scores[playerIndex] ?? 0), 0);
+    const penaltySum = PENALTY_KINDS.reduce((sum, kind) => sum + (ledger[player.id]?.[kind] ?? 0), 0);
+    acc[player.id] = scoreSum + penaltySum;
+    return acc;
+  }, {});
+
+  return {
+    players: players.map((player, index) => ({
+      id: player.id,
+      name: player.displayName,
+      seatIndex: index
+    })),
+    rounds: rounds.map((round, index) => ({
+      id: round.id,
+      round: index + 1,
+      scores: players.map((player, playerIndex) => ({
+        playerId: player.id,
+        points: round.scores[playerIndex] ?? 0
+      }))
+    })),
+    penalties: ledger,
+    totals,
+    started
+  };
+};
+
+const flattenRoundPenaltiesForRound = (
+  roundId: string,
+  map: RoundPenaltyMap,
+  players: Player[]
+) => {
+  const entries = map[roundId];
+  if (!entries) {
+    return [];
+  }
+  return Object.entries(entries).flatMap(([playerIndexKey, penaltyEntries]) => {
+    const playerIndex = Number(playerIndexKey);
+    const player = players[playerIndex];
+    if (!player) {
+      return [];
+    }
+    return penaltyEntries.map((entry) => ({
+      playerId: player.id,
+      type: entry.type,
+      value: entry.value
+    }));
+  });
+};
+
+const pruneRoundPenalties = (map: RoundPenaltyMap, playerCount: number): RoundPenaltyMap => {
+  return Object.entries(map).reduce<RoundPenaltyMap>((acc, [roundId, playerMap]) => {
+    const filtered = Object.entries(playerMap).reduce<Record<number, PenaltyEntry[]>>(
+      (memo, [playerIndexKey, entries]) => {
+        const playerIndex = Number(playerIndexKey);
+        if (playerIndex < playerCount) {
+          memo[playerIndex] = entries;
+        }
+        return memo;
+      },
+      {}
+    );
+    acc[roundId] = filtered;
+    return acc;
+  }, {});
+};
 // === Main ScoreBoard component ===
 // Renders the full glassy scoreboard, handles players, scores, penalties, and the wheel modal.
 export function ScoreBoard({
@@ -193,9 +287,13 @@ export function ScoreBoard({
   initialPlayers,
   initialRounds,
   initialPenalties,
-  onStateChange
+  interactionMode = 'editable',
+  onStateChange,
+  onRoundSubmit,
+  onPlayerChange
 }: ScoreBoardProps): ReactElement {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const isReadonly = interactionMode === 'readonly';
   const initialCount = useMemo(() => {
     const requested = initialPlayers?.length ?? minPlayers;
     return clamp(requested, minPlayers, maxPlayers);
@@ -212,14 +310,46 @@ export function ScoreBoard({
     buildInitialPenalties(playerSeed, initialPenalties)
   );
   const [gameStarted, setGameStarted] = useState<boolean>(() =>
-    Boolean(initialRounds && initialRounds.length)
+    interactionMode === 'readonly' ? true : Boolean(initialRounds && initialRounds.length)
   );
   const [roundPenalties, setRoundPenalties] = useState<RoundPenaltyMap>({});
   const [wheelContext, setWheelContext] = useState<WheelContext | null>(null);
   const [isCompactLayout, setIsCompactLayout] = useState(false);
+  const snapshot = useMemo(
+    () => createSnapshot(players, rounds, penalties, gameStarted),
+    [players, rounds, penalties, gameStarted]
+  );
+  useEffect(() => {
+    if (!onStateChange) {
+      return;
+    }
+    onStateChange(snapshot);
+  }, [snapshot, onStateChange]);
+  const lastPlayerSignatureRef = useRef<string>('');
+  useEffect(() => {
+    if (!onPlayerChange) {
+      return;
+    }
+    const signature = players.map((player) => `${player.id}:${player.displayName}`).join('|');
+    if (signature === lastPlayerSignatureRef.current) {
+      return;
+    }
+    lastPlayerSignatureRef.current = signature;
+    onPlayerChange(players, snapshot);
+  }, [players, onPlayerChange, snapshot]);
+  useEffect(() => {
+    if (isReadonly) {
+      setGameStarted(true);
+    }
+  }, [isReadonly]);
+  useEffect(() => {
+    if (isReadonly && wheelContext) {
+      setWheelContext(null);
+    }
+  }, [isReadonly, wheelContext]);
   // Locks scroll + listens for escape while a wheel is open.
   useEffect(() => {
-    if (!wheelContext) {
+    if (isReadonly || !wheelContext) {
       document.body.style.overflow = '';
       return;
     }
@@ -235,7 +365,7 @@ export function ScoreBoard({
       document.body.style.overflow = previousOverflow;
       window.removeEventListener('keydown', handleEsc);
     };
-  }, [wheelContext]);
+  }, [wheelContext, isReadonly]);
   useEffect(() => {
     if (typeof window === 'undefined') {
       return;
@@ -271,61 +401,32 @@ export function ScoreBoard({
     },
     [isCompactLayout]
   );
-  // Aggregates penalties per type and total per player for UI.
-  const penaltyData = useMemo(() => {
-    const perType = players.map(() => ({
-      misplay: 0,
-      okeyToOpponent: 0,
-      usefulTile: 0,
-      finisher: 0
-    }));
-    const sums = players.map(() => 0);
-    Object.entries(roundPenalties).forEach(([, playerMap]) => {
-      Object.entries(playerMap).forEach(([playerIdxString, entries]) => {
-        const playerIndex = Number(playerIdxString);
-        entries.forEach((entry) => {
-          perType[playerIndex][entry.type] =
-            (perType[playerIndex][entry.type] ?? 0) + entry.value;
-          sums[playerIndex] += entry.value;
-        });
-      });
+  const penaltySummary = useMemo(() => {
+    return players.map((player) => {
+      const ledger = snapshot.penalties[player.id] ?? {};
+      return PENALTY_KINDS.reduce<Record<PenaltyKind, number>>((memo, kind) => {
+        memo[kind] = ledger[kind] ?? 0;
+        return memo;
+      }, {} as Record<PenaltyKind, number>);
     });
-    return { perType, sums };
-  }, [players, roundPenalties]);
-
-  const { perType: penaltyPerType, sums: penaltySums } = penaltyData;
+  }, [players, snapshot]);
 
   // Combines base score with penalty totals for overall ranking.
   const totals = useMemo(() => {
-    return players.map((player, playerIndex) => {
-      const scoreSum = rounds.reduce(
-        (acc, round) => acc + (round.scores[playerIndex] ?? 0),
-        0
-      );
-      return scoreSum + (penaltySums[playerIndex] ?? 0);
-    });
-  }, [players, rounds, penaltySums]);
+    return players.map((player) => snapshot.totals[player.id] ?? 0);
+  }, [players, snapshot]);
   const finiteTotals = totals.filter((value) => Number.isFinite(value));
   const lowestTotal = finiteTotals.length > 0 ? Math.min(...finiteTotals) : 0;
-  useEffect(() => {
-    if (!onStateChange) {
+  const markGameStarted = useCallback(() => {
+    if (isReadonly) {
       return;
     }
-    onStateChange({
-      players,
-      rounds,
-      penalties,
-      totals,
-      started: gameStarted
-    });
-  }, [players, rounds, penalties, totals, gameStarted, onStateChange]);
-  const markGameStarted = useCallback(() => {
     setGameStarted((prev) => (prev ? prev : true));
-  }, []);
+  }, [isReadonly]);
   // --- Player management handlers ---
   const handlePlayerCountChange = useCallback(
     (count: number) => {
-      if (gameStarted) {
+      if (gameStarted || isReadonly) {
         return;
       }
       const targetCount = clamp(count, minPlayers, maxPlayers);
@@ -337,7 +438,7 @@ export function ScoreBoard({
         (_, index) =>
           players[index] ?? {
             id: `player-${makeId()}`,
-            name: `Player ${index + 1}`
+            displayName: `Player ${index + 1}`
           }
       );
       setPlayers(nextPlayers);
@@ -348,41 +449,51 @@ export function ScoreBoard({
         }))
       );
       setPenalties((prev) => syncPenaltyState(nextPlayers, prev));
+      setRoundPenalties((prev) => pruneRoundPenalties(prev, targetCount));
     },
-    [gameStarted, maxPlayers, minPlayers, players]
+    [gameStarted, isReadonly, maxPlayers, minPlayers, players]
   );
   const handleAddPlayer = useCallback(() => {
-    if (players.length >= maxPlayers || gameStarted) {
+    if (players.length >= maxPlayers || gameStarted || isReadonly) {
       return;
     }
     handlePlayerCountChange(players.length + 1);
-  }, [players.length, maxPlayers, gameStarted, handlePlayerCountChange]);
-  const handleRenamePlayer = useCallback((playerId: string, name: string) => {
-    setPlayers((prev) =>
-      prev.map((player) =>
-        player.id === playerId ? { ...player, name } : player
-      )
-    );
-  }, []);
+  }, [players.length, maxPlayers, gameStarted, isReadonly, handlePlayerCountChange]);
+  const handleRenamePlayer = useCallback(
+    (playerId: string, name: string) => {
+      if (isReadonly) {
+        return;
+      }
+      setPlayers((prev) =>
+        prev.map((player) =>
+          player.id === playerId ? { ...player, displayName: name } : player
+        )
+      );
+    },
+    [isReadonly]
+  );
   const handleCompactRename = useCallback(
     (playerId: string) => {
-      if (typeof window === 'undefined') {
+      if (isReadonly || typeof window === 'undefined') {
         return;
       }
       const currentPlayer = players.find((player) => player.id === playerId);
       const nextName = window.prompt(
         'Rename player',
-        currentPlayer?.name ?? ''
-      );
+      currentPlayer?.displayName ?? ''
+    );
       if (nextName && nextName.trim().length > 0) {
         handleRenamePlayer(playerId, nextName.trim());
       }
     },
-    [players, handleRenamePlayer]
+    [players, handleRenamePlayer, isReadonly]
   );
   // --- Score mutations ---
   const updateScoreValue = useCallback(
     (roundIndex: number, playerIndex: number, nextValue: number) => {
+      if (isReadonly) {
+        return;
+      }
       const sanitized = sanitizeScoreInput(nextValue);
       setRounds((prev) =>
         prev.map((round, index) =>
@@ -400,12 +511,12 @@ export function ScoreBoard({
         markGameStarted();
       }
     },
-    [markGameStarted]
+    [markGameStarted, isReadonly]
   );
 
   const adjustScoreValue = useCallback(
     (roundIndex: number, playerIndex: number, delta: number) => {
-      if (delta === 0) {
+      if (isReadonly || delta === 0) {
         return;
       }
       setRounds((prev) =>
@@ -424,12 +535,15 @@ export function ScoreBoard({
       );
       markGameStarted();
     },
-    [markGameStarted]
+    [markGameStarted, isReadonly]
   );
 
   // --- Wheel context openers ---
   const openScoreWheel = useCallback(
     (roundIndex: number, playerIndex: number) => {
+      if (isReadonly) {
+        return;
+      }
       const initialValue = rounds[roundIndex]?.scores[playerIndex] ?? 0;
       setWheelContext({
         kind: 'score',
@@ -438,11 +552,14 @@ export function ScoreBoard({
         initialValue
       });
     },
-    [rounds]
+    [rounds, isReadonly]
   );
 
   const openPenaltyWheel = useCallback(
-    (roundIndex: number, playerIndex: number, penaltyType: PenaltyId) => {
+    (roundIndex: number, playerIndex: number, penaltyType: PenaltyKind) => {
+      if (isReadonly) {
+        return;
+      }
       setWheelContext({
         kind: 'penalty',
         penaltyType,
@@ -451,17 +568,15 @@ export function ScoreBoard({
         initialValue: 0
       });
     },
-    []
+    [isReadonly]
   );
 
   // Records penalty entries per cell and updates aggregated totals.
   const applyPenaltyValue = useCallback(
-    (
-      roundIndex: number,
-      playerIndex: number,
-      penaltyType: PenaltyId,
-      rawValue: number
-    ) => {
+    (roundIndex: number, playerIndex: number, penaltyType: PenaltyKind, rawValue: number) => {
+      if (isReadonly) {
+        return;
+      }
       const sanitized = sanitizeScoreInput(rawValue);
       if (sanitized === 0) {
         return;
@@ -491,9 +606,10 @@ export function ScoreBoard({
             [penaltyType]: (prev[playerId]?.[penaltyType] ?? 0) + sanitized
           }
         }));
+        markGameStarted();
       }
     },
-    [players, rounds]
+    [players, rounds, isReadonly, markGameStarted]
   );
 
   // --- Penalty removal & round lifecycle ---
@@ -508,8 +624,11 @@ export function ScoreBoard({
       playerIndex: number,
       entryId: string,
       entryValue: number,
-      penaltyType: PenaltyId
+      penaltyType: PenaltyKind
     ) => {
+      if (isReadonly) {
+        return;
+      }
       const round = rounds[roundIndex];
       if (!round) {
         return;
@@ -537,65 +656,84 @@ export function ScoreBoard({
         }));
       }
     },
-    [players, rounds]
+    [players, rounds, isReadonly]
   );
 
   /**
    * Appends a fresh round scaffold sized to the current player count. Triggered
    * by the "+ Add round" button so players can keep extending a running game.
    */
+  const submitRound = useCallback(
+    (round: Round | undefined, roundIndex: number) => {
+      if (!onRoundSubmit || !round) {
+        return;
+      }
+      const scoresPayload = players.map((player, playerIndex) => ({
+        playerId: player.id,
+        points: round.scores[playerIndex] ?? 0
+      }));
+      const penaltyEntries = flattenRoundPenaltiesForRound(round.id, roundPenalties, players);
+      const hasActivity =
+        scoresPayload.some((score) => score.points !== 0) || penaltyEntries.length > 0;
+      if (!hasActivity) {
+        return;
+      }
+      onRoundSubmit({
+        roundId: round.id,
+        roundNumber: roundIndex + 1,
+        scores: scoresPayload,
+        penalties: penaltyEntries,
+        snapshot
+      });
+    },
+    [onRoundSubmit, players, roundPenalties, snapshot]
+  );
+
   const handleAddRound = useCallback(() => {
+    if (isReadonly) {
+      return;
+    }
+    if (rounds.length > 0) {
+      submitRound(rounds[rounds.length - 1], rounds.length - 1);
+    }
     setRounds((prev) => [...prev, createEmptyRound(players.length)]);
-  }, [players.length]);
+  }, [players.length, rounds, submitRound, isReadonly]);
   /**
    * Deletes the selected round card unless it is the lone remaining round. Used
    * by the trash icon rendered within each round row to prune mistakes.
    */
   const handleDeleteRound = useCallback((roundId: string) => {
+    if (isReadonly) {
+      return;
+    }
     setRounds((prev) =>
       prev.length > 1 ? prev.filter((round) => round.id !== roundId) : prev
     );
-  }, []);
+  }, [isReadonly]);
   /**
    * Locks the player configuration and pushes the view into "in-progress" mode.
    * Activated by the Start button so we know when to disable player controls.
    */
   const handleStartGame = useCallback(() => {
+    if (isReadonly) {
+      return;
+    }
     setGameStarted(true);
-  }, []);
+  }, [isReadonly]);
   /**
    * Resets the board to a pristine state: wipes rounds, penalties, and the
    * per-round penalty map, and unlocks player controls. Used by the Reset CTA.
    */
   const handleResetGame = useCallback(() => {
+    if (isReadonly) {
+      return;
+    }
     setRounds([createEmptyRound(players.length)]);
     setPenalties(syncPenaltyState(players, {}));
     setRoundPenalties({});
     setGameStarted(false);
-  }, [players]);
-  const disablePlayerControls = gameStarted;
-  /**
-   * Flattens the per-round penalty entries into totals per player/per penalty
-   * type. Drives the "Penalty Summary" section so users see cumulative impact.
-   */
-  const penaltySummary = useMemo(() => {
-    const totals = players.map(() => ({
-      misplay: 0,
-      okeyToOpponent: 0,
-      usefulTile: 0,
-      finisher: 0
-    }));
-    Object.entries(roundPenalties).forEach(([, playerMap]) => {
-      Object.entries(playerMap).forEach(([playerIdxString, entries]) => {
-        const playerIndex = Number(playerIdxString);
-        entries.forEach((entry) => {
-          const bucket = totals[playerIndex];
-          bucket[entry.type] = (bucket[entry.type] ?? 0) + entry.value;
-        });
-      });
-    });
-    return totals;
-  }, [players, roundPenalties]);
+  }, [players, isReadonly]);
+  const disablePlayerControls = isReadonly || gameStarted;
   return (
     <div
       ref={wrapperRef}
@@ -615,58 +753,66 @@ export function ScoreBoard({
               Track up to four players — lowest score wins.
             </p>
           </div>
-          <div className="scoreboard-actions">
-            <GlassButton onClick={handleStartGame} disabled={gameStarted}>
-              {gameStarted ? 'Game Locked' : 'Start Game'}
-            </GlassButton>
-            <GlassButton tone="secondary" onClick={handleResetGame}>
-              Reset
-            </GlassButton>
-          </div>
-        </header>
-        <section
-          aria-label="Player controls"
-          className="scoreboard-player-controls"
-        >
-          <div
-            role="group"
-            aria-label="Select player count"
-            className="scoreboard-player-count-toggle"
-          >
-            {[2, 3, 4]
-              .filter((count) => count >= minPlayers && count <= maxPlayers)
-              .map((count) => {
-                const isActive = players.length === count;
-                return (
-                  <button
-                    key={count}
-                    type="button"
-                    disabled={disablePlayerControls}
-                    onClick={() => handlePlayerCountChange(count)}
-                    className={`scoreboard-player-count-option${
-                      isActive ? ' active' : ''
-                    }`}
-                  >
-                    {count}
-                  </button>
-                );
-              })}
-          </div>
-          <button
-            type="button"
-            aria-label="Add player"
-            onClick={handleAddPlayer}
-            disabled={disablePlayerControls || players.length >= maxPlayers}
-            className="scoreboard-player-add-btn"
-          >
-            +
-          </button>
-          {gameStarted && (
-            <span className="scoreboard-player-lock-message">
-              Player setup locked for this game.
-            </span>
+        <div className="scoreboard-actions">
+          {isReadonly ? (
+            <span className="scoreboard-mode-badge">Historical view</span>
+          ) : (
+            <>
+              <GlassButton onClick={handleStartGame} disabled={gameStarted}>
+                {gameStarted ? 'Game Locked' : 'Start Game'}
+              </GlassButton>
+              <GlassButton tone="secondary" onClick={handleResetGame}>
+                Reset
+              </GlassButton>
+            </>
           )}
-        </section>
+        </div>
+      </header>
+        {!isReadonly && (
+          <section
+            aria-label="Player controls"
+            className="scoreboard-player-controls"
+          >
+            <div
+              role="group"
+              aria-label="Select player count"
+              className="scoreboard-player-count-toggle"
+            >
+              {[2, 3, 4]
+                .filter((count) => count >= minPlayers && count <= maxPlayers)
+                .map((count) => {
+                  const isActive = players.length === count;
+                  return (
+                    <button
+                      key={count}
+                      type="button"
+                      disabled={disablePlayerControls}
+                      onClick={() => handlePlayerCountChange(count)}
+                      className={`scoreboard-player-count-option${
+                        isActive ? ' active' : ''
+                      }`}
+                    >
+                      {count}
+                    </button>
+                  );
+                })}
+            </div>
+            <button
+              type="button"
+              aria-label="Add player"
+              onClick={handleAddPlayer}
+              disabled={disablePlayerControls || players.length >= maxPlayers}
+              className="scoreboard-player-add-btn"
+            >
+              +
+            </button>
+            {gameStarted && !isReadonly && (
+              <span className="scoreboard-player-lock-message">
+                Player setup locked for this game.
+              </span>
+            )}
+          </section>
+        )}
         <section role="rowgroup" className="scoreboard-rowgroup">
           <div
             role="row"
@@ -681,24 +827,30 @@ export function ScoreBoard({
                 className="scoreboard-player-card"
                 style={{ border: `1px solid ${getAccent(index)}` }}
               >
-                {isCompactLayout ? (
+                {isReadonly ? (
+                  <span className="scoreboard-player-label">
+                    {formatDisplayName(player.displayName)}
+                  </span>
+                ) : isCompactLayout ? (
                   <button
                     type="button"
                     className="scoreboard-player-compact-button"
                     onClick={() => handleCompactRename(player.id)}
                     disabled={disablePlayerControls}
-                    aria-label={`Rename ${player.name}`}
+                    aria-label={`Rename ${player.displayName}`}
                   >
-                    {formatDisplayName(player.name)}
+                    {formatDisplayName(player.displayName)}
                   </button>
                 ) : (
                   <input
-                    aria-label={`Rename ${player.name}`}
-                    value={player.name}
+                    aria-label={`Rename ${player.displayName}`}
+                    value={player.displayName}
                     onChange={(event) =>
                       handleRenamePlayer(player.id, event.target.value)
                     }
                     className="scoreboard-player-input"
+                    readOnly={disablePlayerControls}
+                    disabled={disablePlayerControls}
                   />
                 )}
               </div>
@@ -724,47 +876,57 @@ export function ScoreBoard({
                 return (
                   <div
                     key={`${round.id}-${playerIndex}`}
-                    className="scoreboard-score-cell"
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`Round ${roundIndex + 1} score for ${
-                      players[playerIndex].name
+                    className={`scoreboard-score-cell${
+                      isReadonly ? ' scoreboard-score-cell--readonly' : ''
                     }`}
-                    onClick={() => openScoreWheel(roundIndex, playerIndex)}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter' || event.key === ' ') {
-                        event.preventDefault();
-                        openScoreWheel(roundIndex, playerIndex);
-                      } else if (event.key === 'ArrowUp') {
-                        event.preventDefault();
-                        adjustScoreValue(roundIndex, playerIndex, 1);
-                      } else if (event.key === 'ArrowDown') {
-                        event.preventDefault();
-                        adjustScoreValue(roundIndex, playerIndex, -1);
-                      }
-                    }}
+                    role={isReadonly ? undefined : 'button'}
+                    tabIndex={isReadonly ? -1 : 0}
+                    aria-label={`Round ${roundIndex + 1} score for ${
+                      players[playerIndex].displayName
+                    }`}
+                    onClick={
+                      isReadonly ? undefined : () => openScoreWheel(roundIndex, playerIndex)
+                    }
+                    onKeyDown={
+                      isReadonly
+                        ? undefined
+                        : (event) => {
+                            if (event.key === 'Enter' || event.key === ' ') {
+                              event.preventDefault();
+                              openScoreWheel(roundIndex, playerIndex);
+                            } else if (event.key === 'ArrowUp') {
+                              event.preventDefault();
+                              adjustScoreValue(roundIndex, playerIndex, 1);
+                            } else if (event.key === 'ArrowDown') {
+                              event.preventDefault();
+                              adjustScoreValue(roundIndex, playerIndex, -1);
+                            }
+                          }
+                    }
                   >
                     <span className="scoreboard-score-display">{value}</span>
-                    <div className="scoreboard-penalty-symbols">
-                      {PENALTY_TYPES.map((penalty) => (
-                        <button
-                          key={penalty.id}
-                          type="button"
-                          className="scoreboard-penalty-symbol"
-                          aria-label={`${penalty.label} penalty`}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            openPenaltyWheel(
-                              roundIndex,
-                              playerIndex,
-                              penalty.id
-                            );
-                          }}
-                        >
-                          {penalty.icon}
-                        </button>
-                      ))}
-                    </div>
+                    {!isReadonly && (
+                      <div className="scoreboard-penalty-symbols">
+                        {PENALTY_TYPES.map((penalty) => (
+                          <button
+                            key={penalty.id}
+                            type="button"
+                            className="scoreboard-penalty-symbol"
+                            aria-label={`${penalty.label} penalty`}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              openPenaltyWheel(
+                                roundIndex,
+                                playerIndex,
+                                penalty.id
+                              );
+                            }}
+                          >
+                            {penalty.icon}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                     {cellPenalties.length > 0 && (
                       <>
                         <div className="scoreboard-penalty-tags">
@@ -780,24 +942,26 @@ export function ScoreBoard({
                                 <span>
                                   {penaltyMeta?.icon} {entry.value}
                                 </span>
-                                <button
-                                  type="button"
-                                  aria-label="Remove penalty"
-                                  onClick={(
-                                    event: MouseEvent<HTMLButtonElement>
-                                  ) => {
-                                    event.stopPropagation();
-                                    handleRemovePenaltyEntry(
-                                      roundIndex,
-                                      playerIndex,
-                                      entry.id,
-                                      entry.value,
-                                      entry.type
-                                    );
-                                  }}
-                                >
-                                  ×
-                                </button>
+                                {!isReadonly && (
+                                  <button
+                                    type="button"
+                                    aria-label="Remove penalty"
+                                    onClick={(
+                                      event: MouseEvent<HTMLButtonElement>
+                                    ) => {
+                                      event.stopPropagation();
+                                      handleRemovePenaltyEntry(
+                                        roundIndex,
+                                        playerIndex,
+                                        entry.id,
+                                        entry.value,
+                                        entry.type
+                                      );
+                                    }}
+                                  >
+                                    ×
+                                  </button>
+                                )}
                               </div>
                             );
                           })}
@@ -810,24 +974,28 @@ export function ScoreBoard({
                   </div>
                 );
               })}
-              <button
-                type="button"
-                aria-label={`Delete round ${roundIndex + 1}`}
-                onClick={() => handleDeleteRound(round.id)}
-                disabled={rounds.length === 1}
-                className="scoreboard-round-delete"
-              >
-                🗑️
-              </button>
+              {!isReadonly && (
+                <button
+                  type="button"
+                  aria-label={`Delete round ${roundIndex + 1}`}
+                  onClick={() => handleDeleteRound(round.id)}
+                  disabled={rounds.length === 1}
+                  className="scoreboard-round-delete"
+                >
+                  🗑️
+                </button>
+              )}
             </div>
           ))}
-          <button
-            type="button"
-            onClick={handleAddRound}
-            className="scoreboard-add-round-btn"
-          >
-            + Add round
-          </button>
+          {!isReadonly && (
+            <button
+              type="button"
+              onClick={handleAddRound}
+              className="scoreboard-add-round-btn"
+            >
+              + Add round
+            </button>
+          )}
         </section>
         <section aria-labelledby="penalties" className="scoreboard-penalties">
           <div id="penalties" className="scoreboard-penalties-header">
@@ -859,7 +1027,7 @@ export function ScoreBoard({
                         borderColor: getAccent(index)
                       }}
                     >
-                      <span>{formatDisplayName(player.name)}</span>
+                      <span>{formatDisplayName(player.displayName)}</span>
                       <strong>
                         {penaltySummary[index]?.[penalty.id] ?? 0}
                       </strong>
@@ -887,7 +1055,7 @@ export function ScoreBoard({
                   style={{ border: `1px solid ${getAccent(index)}` }}
                 >
                   <div className="scoreboard-total-player">
-                    {formatDisplayName(player.name)}
+                    {formatDisplayName(player.displayName)}
                   </div>
                   <div className="scoreboard-total-score">{total}</div>
                   {isLeader && (
@@ -908,7 +1076,7 @@ export function ScoreBoard({
         </footer>
       </div>
 
-      {wheelContext && (
+      {!isReadonly && wheelContext && (
         <WheelOverlay
           player={players[wheelContext.playerIndex]}
           roundLabel={`Round ${wheelContext.roundIndex + 1}`}
@@ -1043,7 +1211,7 @@ function WheelOverlay({
         <header className="scoreboard-wheel-header">
           <div>
             <p className="scoreboard-wheel-label">{roundLabel}</p>
-            <h3 className="scoreboard-wheel-player">{player.name}</h3>
+            <h3 className="scoreboard-wheel-player">{player.displayName}</h3>
             {contextLabel && (
               <p className="scoreboard-wheel-context">{contextLabel}</p>
             )}
