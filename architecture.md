@@ -40,7 +40,9 @@ apps/api (NestJS) has TS paths to `packages/domain`, though the current controll
 
 ### Web (`apps/web`)
 
-- Next.js 14 (`apps/web/package.json`) with scripts for `dev`, `build`, and `start`. Dependencies are `next`, `react`, `react-dom`, and the UI kit via a `workspace:*` range so pnpm links directly to `packages/ui-kit` during local development.
+- Next.js 14 (`apps/web/package.json`) with scripts for `dev`, `build`, and `start`.
+- Core dependencies are `next`, `react`, `react-dom`, and the UI kit via a `workspace:*` range so pnpm links directly to `packages/ui-kit` during local development.
+- Additional frontend scaffolding dependencies now include `@tanstack/react-query`, `axios`, `react-hook-form`, `zod`, `@hookform/resolvers`, and `zustand` for auth/forms/data loading.
 - `tsconfig.json` maps `ui-kit` and `domain/*` into the source folders (`packages/ui-kit/src`, `packages/domain/src`) and includes those files so the editor/tsc see live TypeScript rather than prebuilt artifacts.
 - `next.config.js`:
   - Enables `transpilePackages: ['ui-kit']` so Next transpiles the shared component library during bundling.
@@ -48,6 +50,10 @@ apps/api (NestJS) has TS paths to `packages/domain`, though the current controll
   - Adds a webpack alias that resolves `'ui-kit'` to `packages/ui-kit/src`, which (combined with the workspace link) enables hot reload when editing shared components.
 - Runtime wiring:
   - `_app.tsx` loads `src/styles/global.css`, which defines CSS variables for the web container. Shared UI kit tokens live within `packages/ui-kit/src/themes/global.css` so the component library can ship defaults without reaching into the app.
+  - `_app.tsx` now composes `QueryClientProvider` + `ThemeProvider` + `AuthProvider`, then renders the active page. Query defaults disable aggressive refetching and keep retry behavior conservative for auth-sensitive routes.
+  - `src/lib/api/httpClient.ts` centralizes browser-side API traffic with axios, normalizes `{ message, code }` errors, and performs one automatic refresh/retry cycle on 401 responses before falling back to logout cleanup.
+  - `src/lib/auth/AuthContext.tsx` bootstraps session state from `/api/auth/session` and exposes `login/register/logout/refreshSession`; `src/lib/auth/AuthGate.tsx` handles client-side route guarding.
+  - Next API auth proxies live under `src/pages/api/auth/*` (`login`, `register`, `refresh`, `logout`, `forgot-password`, `reset-password`, `session`) and use shared helpers in `src/lib/api-proxy/*` for upstream requests plus httpOnly cookie management.
   - `src/pages/index.tsx` imports `Button` from `ui-kit` to prove that cross-package components render on the homepage.
   - `src/pages/score_board.tsx` imports `ScoreBoard` from `ui-kit` and passes initial players, round scores, and penalty counts. The component handles its own React state and invokes `onStateChange` whenever the board mutates.
 
