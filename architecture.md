@@ -57,6 +57,9 @@ apps/api (NestJS) has TS paths to `packages/domain`, though the current controll
   - Auth-facing pages now include `src/pages/login.tsx`, `register.tsx`, `forgot-password.tsx`, and `reset-password.tsx`, each using `react-hook-form` + `zod` validation and submitting through the Next auth proxy routes.
   - `src/components/layout/DashboardLayout.tsx` provides the authenticated app shell: desktop sidebar (Dashboard/History/Profile/Logout), top bar user chip + `ThemeToggle`, and a mobile collapsible drawer menu.
   - `src/pages/dashboard.tsx`, `history.tsx`, and `profile.tsx` now run inside `AuthGate` + `DashboardLayout`, so shell navigation is functional and route guards are applied consistently.
+  - `src/pages/api/games/[[...path]].ts` now proxies authenticated game traffic (`/games`, `/games/active`, `/games/:id/rounds`, `/games/:id/players`, `/games/:id/complete`) from browser calls to Nest by forwarding the access cookie as a bearer token.
+  - `src/lib/api/games.ts` centralizes dashboard game requests (active-game query plus create/add-round/update-players/complete mutations) so feature pages do not duplicate endpoint wiring.
+  - `src/pages/dashboard.tsx` now runs the full Dashboard epic: React Query `['active-game']` fetch, editable `ScoreBoard` wiring, debounced player autosave, quick-action modal for new games, completion action, and loading/empty/error states with stat highlight cards.
   - `src/pages/index.tsx` imports `Button` from `ui-kit` to prove that cross-package components render on the homepage.
   - `src/pages/score_board.tsx` imports `ScoreBoard` from `ui-kit` and passes initial players, round scores, and penalty counts. The component handles its own React state and invokes `onStateChange` whenever the board mutates.
 
