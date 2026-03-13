@@ -1,73 +1,66 @@
 import Head from 'next/head';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
-import { ThemeToggle } from '../components/ThemeToggle';
-import { useAuth } from '../lib/auth/AuthContext';
 import { AuthGate } from '../lib/auth/AuthGate';
-import styles from '../styles/auth-page.module.css';
+import { DashboardLayout } from '../components/layout/DashboardLayout';
+import styles from '../styles/app-shell-page.module.css';
 
 /**
- * @description Temporary protected dashboard target used by auth-page redirects.
- * @returns A guarded dashboard placeholder until the app-shell/dashboard epic is implemented.
+ * @description Renders the protected dashboard landing surface inside the reusable app shell.
+ * @returns Dashboard route content wrapped by auth gate + dashboard layout.
  * @Used_by
- *   - Login/register success redirects and direct navigation to `/dashboard`.
+ *   - Navigation to `/dashboard` after successful auth flows.
  * @Side_effects
- *   - Invokes logout flow and client-side navigation when users sign out.
+ *   - None.
  */
 export default function DashboardPage() {
-  const router = useRouter();
-  const { user, logout } = useAuth();
-
-  const handleLogout = async () => {
-    await logout();
-    await router.push('/login');
-  };
-
   return (
     <>
       <Head>
         <title>Okey Score • Dashboard</title>
       </Head>
       <AuthGate loadingFallback={null}>
-        <main className={styles.page}>
-          <div className={styles.backgroundGlow} aria-hidden>
-            <span className={`${styles.glow} ${styles.glowOne}`} />
-            <span className={`${styles.glow} ${styles.glowTwo}`} />
-          </div>
-
-          <header className={styles.toolbar}>
-            <Link className={styles.backLink} href="/">
-              ← Back home
-            </Link>
-            <ThemeToggle />
-          </header>
-
-          <section className={styles.shell}>
-            <p className={styles.eyebrow}>Dashboard</p>
-            <h1 className={styles.title}>You are signed in</h1>
-            <p className={styles.subtitle}>
-              Welcome {user?.displayName ?? 'player'}. Dashboard shell pages are next in the
-              roadmap.
-            </p>
-
-            <div className={styles.infoBox}>
-              Current account: <strong>{user?.email ?? 'Unknown'}</strong>
-            </div>
-
-            <div className={styles.dashboardActions}>
-              <Link className={styles.secondaryButton} href="/score_board">
-                Open demo board
+        <DashboardLayout
+          title="Dashboard"
+          subtitle="Track active games, history, and profile controls from one place."
+        >
+          <div className={styles.stack}>
+            <article className={styles.card}>
+              <p className={styles.cardEyebrow}>Status</p>
+              <h3 className={styles.cardTitle}>App shell ready</h3>
+              <p className={styles.cardCopy}>
+                The responsive navigation and top-bar user controls are now in
+                place. Dashboard game wiring is the next epic.
+              </p>
+              <Link className={styles.linkButton} href="/score_board">
+                Open score board demo
               </Link>
-              <button
-                type="button"
-                className={styles.secondaryButton}
-                onClick={handleLogout}
-              >
-                Logout
-              </button>
+            </article>
+
+            <div className={styles.grid}>
+              <article className={styles.card}>
+                <p className={styles.cardEyebrow}>Next</p>
+                <h3 className={styles.cardTitle}>History view</h3>
+                <p className={styles.cardCopy}>
+                  Browse completed sessions and inspect round snapshots.
+                </p>
+                <Link className={styles.linkButton} href="/history">
+                  Go to history
+                </Link>
+              </article>
+
+              <article className={styles.card}>
+                <p className={styles.cardEyebrow}>Next</p>
+                <h3 className={styles.cardTitle}>Profile controls</h3>
+                <p className={styles.cardCopy}>
+                  Manage personal details, password rotation, and active sessions.
+                </p>
+                <Link className={styles.linkButton} href="/profile">
+                  Go to profile
+                </Link>
+              </article>
             </div>
-          </section>
-        </main>
+          </div>
+        </DashboardLayout>
       </AuthGate>
     </>
   );

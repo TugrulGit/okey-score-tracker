@@ -1,0 +1,70 @@
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.card {
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  background: rgba(255, 255, 255, 0.36);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.14);
+  padding: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.cardEyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: var(--font-size-eyebrow, clamp(0.6rem, 0.07vw + 0.56rem, 0.72rem));
+  color: var(--font-color-muted, rgba(8, 17, 31, 0.62));
+  font-weight: 700;
+}
+
+.cardTitle {
+  margin: 0;
+  color: var(--font-color-primary, rgba(8, 17, 31, 0.9));
+  font-size: var(--font-size-heading-md, clamp(1.1rem, 0.45vw + 0.9rem, 1.6rem));
+}
+
+.cardCopy {
+  margin: 0;
+  color: var(--font-color-muted, rgba(8, 17, 31, 0.64));
+  font-size: var(--font-size-body, clamp(0.75rem, calc(0.1vw + 0.68rem), 1.05rem));
+}
+
+.linkButton {
+  align-self: flex-start;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.45);
+  color: var(--font-color-primary, rgba(8, 17, 31, 0.9));
+  text-decoration: none;
+  font-weight: 700;
+  font-size: var(--font-size-label, clamp(0.7rem, 0.09vw + 0.64rem, 0.85rem));
+  padding: 0.45rem 0.8rem;
+}
+
+.metaList {
+  margin: 0;
+  padding-left: 1rem;
+  color: var(--font-color-primary, rgba(8, 17, 31, 0.9));
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+@media (max-width: 860px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

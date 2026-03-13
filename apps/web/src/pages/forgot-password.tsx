@@ -10,7 +10,7 @@ import { toAuthFormErrorMessage } from '../lib/auth/auth-form-error';
 import styles from '../styles/auth-page.module.css';
 
 const forgotPasswordSchema = z.object({
-  email: z.string().trim().email('Enter a valid email address.')
+  email: z.string().trim().pipe(z.email('Enter a valid email address.'))
 });
 
 type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>;

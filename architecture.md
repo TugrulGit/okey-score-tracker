@@ -55,7 +55,8 @@ apps/api (NestJS) has TS paths to `packages/domain`, though the current controll
   - `src/lib/auth/AuthContext.tsx` bootstraps session state from `/api/auth/session` and exposes `login/register/logout/refreshSession`; `src/lib/auth/AuthGate.tsx` handles client-side route guarding.
   - Next API auth proxies live under `src/pages/api/auth/*` (`login`, `register`, `refresh`, `logout`, `forgot-password`, `reset-password`, `session`) and use shared helpers in `src/lib/api-proxy/*` for upstream requests plus httpOnly cookie management.
   - Auth-facing pages now include `src/pages/login.tsx`, `register.tsx`, `forgot-password.tsx`, and `reset-password.tsx`, each using `react-hook-form` + `zod` validation and submitting through the Next auth proxy routes.
-  - `src/pages/dashboard.tsx` is currently a guarded placeholder destination used by auth redirects until the full app-shell/dashboard epic lands.
+  - `src/components/layout/DashboardLayout.tsx` provides the authenticated app shell: desktop sidebar (Dashboard/History/Profile/Logout), top bar user chip + `ThemeToggle`, and a mobile collapsible drawer menu.
+  - `src/pages/dashboard.tsx`, `history.tsx`, and `profile.tsx` now run inside `AuthGate` + `DashboardLayout`, so shell navigation is functional and route guards are applied consistently.
   - `src/pages/index.tsx` imports `Button` from `ui-kit` to prove that cross-package components render on the homepage.
   - `src/pages/score_board.tsx` imports `ScoreBoard` from `ui-kit` and passes initial players, round scores, and penalty counts. The component handles its own React state and invokes `onStateChange` whenever the board mutates.
 
