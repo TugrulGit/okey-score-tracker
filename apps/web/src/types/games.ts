@@ -40,6 +40,37 @@ export interface GameLeader {
   total: number;
 }
 
+export interface GameSummaryLeader {
+  playerId: string;
+  displayName?: string;
+  name?: string;
+  total: number;
+}
+
+export interface GameHistorySummary {
+  leader?: GameSummaryLeader | null;
+  totals?: Record<string, number>;
+}
+
+export interface GameHistoryItem {
+  id: string;
+  title: string;
+  status: GameStatus;
+  completedAt: string | null;
+  createdAt: string;
+  players: Array<{
+    id: string;
+    displayName: string;
+    seatIndex: number;
+  }>;
+  snapshot: GameHistorySummary | null;
+}
+
+export interface GameHistoryResponse {
+  items: GameHistoryItem[];
+  nextCursor: string | null;
+}
+
 export interface GameDetail {
   id: string;
   ownerId: string;
@@ -86,4 +117,11 @@ export interface UpdatePlayersInput {
     displayName?: string;
     seatIndex?: number;
   }>;
+}
+
+export interface GamesHistoryQuery {
+  status?: GameStatus;
+  participantId?: string;
+  cursor?: string;
+  limit?: number;
 }

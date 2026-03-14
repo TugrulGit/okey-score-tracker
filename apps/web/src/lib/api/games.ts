@@ -4,6 +4,8 @@ import type {
   AddRoundInput,
   CreateGameInput,
   GameDetail,
+  GameHistoryResponse,
+  GamesHistoryQuery,
   UpdatePlayersInput
 } from '../../types/games';
 
@@ -96,5 +98,40 @@ export async function completeGame(gameId: string): Promise<GameDetail> {
   return requestJson<GameDetail>({
     url: `/games/${gameId}/complete`,
     method: 'POST'
+  });
+}
+
+/**
+ * @description Fetches paginated game history with optional backend-supported filters and cursor.
+ * @param query - Optional status/participant/cursor/limit filters sent as query params.
+ * @returns Cursor-paginated history response including lightweight game summary items.
+ * @Used_by
+ *   - History page infinite list query.
+ * @Side_effects
+ *   - Performs network I/O to `GET /api/games/history`.
+ */
+export async function fetchGamesHistory(
+  query: GamesHistoryQuery
+): Promise<GameHistoryResponse> {
+  return requestJson<GameHistoryResponse>({
+    url: '/games/history',
+    method: 'GET',
+    params: query
+  });
+}
+
+/**
+ * @description Fetches a single game detail payload by id.
+ * @param gameId - Target game id.
+ * @returns Full game detail projection with rounds, totals, and penalty breakdowns.
+ * @Used_by
+ *   - History modal readonly scoreboard query.
+ * @Side_effects
+ *   - Performs network I/O to `GET /api/games/:id`.
+ */
+export async function fetchGameById(gameId: string): Promise<GameDetail> {
+  return requestJson<GameDetail>({
+    url: `/games/${gameId}`,
+    method: 'GET'
   });
 }
